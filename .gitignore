@@ -1,0 +1,25 @@
+.vercel
+design/.vercel
+.idea
+.DS_Store
+.logs/
+.pnpm_hash
+
+# apps/api (Flask)
+apps/api/.venv/
+apps/api/.env
+apps/api/__pycache__/
+apps/api/**/__pycache__/
+apps/api/*.egg-info/
+apps/api/.pytest_cache/
+
+# JS workspace (root + apps/web)
+node_modules/
+.next/
+.turbo/
+apps/web/.env.local
+
+.claude
+docs/
+CLAUDE.md
+TODO.md

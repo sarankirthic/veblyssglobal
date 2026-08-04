@@ -1,0 +1,37 @@
+# apps/api — Flask REST API (see docs/ARCHITECTURE.md §10)
+FROM python:3.12-slim AS base
+
+ENV PYTHONDONTWRITEBYTECODE=1 \
+    PYTHONUNBUFFERED=1 \
+    PIP_NO_CACHE_DIR=1
+
+WORKDIR /app
+
+# psycopg2 needs libpq at build + runtime; Pillow needs libjpeg/zlib at runtime.
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    libpq5 libjpeg62-turbo zlib1g \
+    && rm -rf /var/lib/apt/lists/*
+
+FROM base AS builder
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    build-essential libpq-dev libjpeg-dev zlib1g-dev \
+    && rm -rf /var/lib/apt/lists/*
+
+COPY apps/api/requirements.txt .
+RUN pip install --user -r requirements.txt
+
+FROM base AS runtime
+COPY --from=builder /root/.local /root/.local
+ENV PATH=/root/.local/bin:$PATH
+
+COPY apps/api/ .
+
+RUN useradd --create-home --uid 1000 veblyss
+USER veblyss
+
+EXPOSE 4000
+
+HEALTHCHECK --interval=30s --timeout=5s --start-period=10s \
+    CMD python -c "import urllib.request,sys; sys.exit(0) if urllib.request.urlopen('http://127.0.0.1:4000/api/v1/health').status == 200 else sys.exit(1)"
+
+CMD ["gunicorn", "--bind", "0.0.0.0:4000", "--workers", "4", "--access-logfile", "-", "wsgi:app"]
