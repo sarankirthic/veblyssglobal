@@ -1,20 +1,18 @@
 from werkzeug.security import check_password_hash, generate_password_hash
 
+from app.common.mixins import TimestampMixin, uuid_pk
 from app.extensions import db
-from app.models.mixins import TimestampMixin, uuid_pk
 
 
 class Role:
     ADMIN = "admin"
     EDITOR = "editor"
     VIEWER = "viewer"
-
     ALL = (ADMIN, EDITOR, VIEWER)
 
 
 class User(db.Model, TimestampMixin):
     __tablename__ = "users"
-
     id = uuid_pk()
     email = db.Column(db.String(255), unique=True, nullable=False, index=True)
     name = db.Column(db.String(255), nullable=False)

@@ -1,10 +1,9 @@
+from app.common.mixins import TimestampMixin, uuid_pk
 from app.extensions import db
-from app.models.mixins import TimestampMixin, uuid_pk
 
 
 class ContactSubmission(db.Model, TimestampMixin):
     __tablename__ = "contact_submissions"
-
     id = uuid_pk()
     name = db.Column(db.String(200), nullable=False)
     email = db.Column(db.String(255), nullable=False, index=True)

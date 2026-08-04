@@ -203,14 +203,19 @@ PIP="$VENV/bin/pip"
 FLASK="$VENV/bin/flask"
 GUNICORN="$VENV/bin/gunicorn"
 
+# dev installs requirements-dev.txt (adds pytest for local `pytest -q` runs);
+# prod installs requirements.txt only, matching Dockerfile.api's image.
+REQ_FILE="requirements.txt"
+[[ "$MODE" == "dev" ]] && REQ_FILE="requirements-dev.txt"
+
 REQ_HASH_FILE="$VENV/.req_hash"
-REQ_HASH=$(md5sum "$SERVER/requirements.txt" 2>/dev/null | awk '{print $1}' \
-           || md5 -q "$SERVER/requirements.txt" 2>/dev/null || echo "")
+REQ_HASH=$(md5sum "$SERVER/$REQ_FILE" 2>/dev/null | awk '{print $1}' \
+           || md5 -q "$SERVER/$REQ_FILE" 2>/dev/null || echo "")
 CACHED_HASH=$(cat "$REQ_HASH_FILE" 2>/dev/null || echo "")
 
 if [[ "$REQ_HASH" != "$CACHED_HASH" ]]; then
-  info "Installing Python dependencies..."
-  "$PIP" install -q -r "$SERVER/requirements.txt"
+  info "Installing Python dependencies ($REQ_FILE)..."
+  "$PIP" install -q -r "$SERVER/$REQ_FILE"
   echo "$REQ_HASH" > "$REQ_HASH_FILE"
   ok "Python dependencies installed"
 else

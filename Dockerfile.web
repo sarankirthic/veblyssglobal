@@ -1,0 +1,50 @@
+# apps/web — Next.js storefront, standalone self-hosted build (Docker/Coolify).
+# Vercel deploys don't use this file at all — Vercel builds apps/web directly.
+FROM node:20-slim AS base
+ENV PNPM_HOME="/pnpm"
+ENV PATH="$PNPM_HOME:$PATH"
+RUN corepack enable
+
+FROM base AS deps
+WORKDIR /repo
+COPY package.json pnpm-lock.yaml pnpm-workspace.yaml turbo.json ./
+COPY apps/web/package.json apps/web/package.json
+RUN pnpm install --frozen-lockfile
+
+FROM base AS builder
+WORKDIR /repo
+ENV NEXT_TELEMETRY_DISABLED=1
+# NEXT_PUBLIC_* vars are inlined into the client JS bundle at build time —
+# ContactForm.tsx is a Client Component that calls the API directly from the
+# browser, so this MUST be a build arg, not just a runtime `environment:` in
+# docker-compose.yml (that would only affect the server-side process, and the
+# browser bundle would silently fall back to localhost:4000).
+ARG NEXT_PUBLIC_API_URL
+ENV NEXT_PUBLIC_API_URL=$NEXT_PUBLIC_API_URL
+COPY --from=deps /repo/node_modules ./node_modules
+COPY package.json pnpm-lock.yaml pnpm-workspace.yaml turbo.json ./
+COPY apps/web ./apps/web
+RUN pnpm --filter @veblyss/web build
+
+FROM base AS runtime
+WORKDIR /app
+ENV NODE_ENV=production \
+    NEXT_TELEMETRY_DISABLED=1 \
+    PORT=3000 \
+    HOSTNAME=0.0.0.0
+
+RUN useradd --create-home --uid 1000 veblyss
+
+# output: "standalone" traces the minimal server + node_modules needed to run,
+# shaped to match outputFileTracingRoot (repo root) — hence apps/web/... below.
+COPY --from=builder /repo/apps/web/.next/standalone ./
+COPY --from=builder /repo/apps/web/.next/static ./apps/web/.next/static
+COPY --from=builder /repo/apps/web/public ./apps/web/public
+
+USER veblyss
+EXPOSE 3000
+
+HEALTHCHECK --interval=30s --timeout=5s --start-period=10s \
+    CMD node -e "fetch('http://127.0.0.1:3000/').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))"
+
+CMD ["node", "apps/web/server.js"]

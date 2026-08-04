@@ -1,37 +1,50 @@
 from sqlalchemy.dialects.postgresql import JSONB
 
+from app.common.mixins import TimestampMixin, uuid_pk
 from app.extensions import db
-from app.models.mixins import TimestampMixin, uuid_pk
 
-# JSONB is Postgres-only; fall back to generic JSON for SQLite in tests.
 JsonType = db.JSON().with_variant(JSONB, "postgresql")
+
+
+class Category(db.Model, TimestampMixin):
+    __tablename__ = "categories"
+    id = uuid_pk()
+    name = db.Column(db.String(120), nullable=False)
+    slug = db.Column(db.String(140), unique=True, nullable=False, index=True)
+    description = db.Column(db.Text, nullable=True)
+    origin_region = db.Column(db.String(120), nullable=True)
+    display_order = db.Column(db.Integer, nullable=False, default=0)
+    products = db.relationship("Product", back_populates="category", lazy="selectin")
+
+    def to_dict(self) -> dict:
+        return {
+            "id": self.id,
+            "name": self.name,
+            "slug": self.slug,
+            "description": self.description,
+            "originRegion": self.origin_region,
+            "displayOrder": self.display_order,
+        }
 
 
 class Product(db.Model, TimestampMixin):
     __tablename__ = "products"
-
     id = uuid_pk()
     category_id = db.Column(db.String(36), db.ForeignKey("categories.id"), nullable=False, index=True)
     name = db.Column(db.String(200), nullable=False)
     slug = db.Column(db.String(220), unique=True, nullable=False, index=True)
     short_description = db.Column(db.String(400), nullable=True)
     description = db.Column(db.Text, nullable=True)
-
     materials = db.Column(db.String(300), nullable=True)
     dimensions = db.Column(db.String(120), nullable=True)
     moq = db.Column(db.String(60), nullable=True)
     packaging = db.Column(db.String(200), nullable=True)
     lead_time = db.Column(db.String(120), nullable=True)
     price_range = db.Column(db.String(120), nullable=True)
-
-    # Free-form additional spec rows: [{"key": "Care", "value": "..."}]
     specs = db.Column(JsonType, nullable=False, default=list)
-    # Ordered list of R2 image URLs
     images = db.Column(JsonType, nullable=False, default=list)
-
     featured = db.Column(db.Boolean, nullable=False, default=False)
     is_published = db.Column(db.Boolean, nullable=False, default=True)
-
     category = db.relationship("Category", back_populates="products")
 
     def to_dict(self) -> dict:

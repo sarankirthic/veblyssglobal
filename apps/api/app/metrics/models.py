@@ -1,11 +1,11 @@
-from app.extensions import db
-from app.models.mixins import uuid_pk
 from datetime import datetime, timezone
+
+from app.common.mixins import uuid_pk
+from app.extensions import db
 
 
 class MetricEvent(db.Model):
     __tablename__ = "metric_events"
-
     id = uuid_pk()
     type = db.Column(db.String(60), nullable=False, index=True)  # pageview | enquiry | product_view ...
     path = db.Column(db.String(300), nullable=True)
@@ -28,7 +28,6 @@ class MetricEvent(db.Model):
 
 class ActivityLog(db.Model):
     __tablename__ = "activity_logs"
-
     id = uuid_pk()
     user_id = db.Column(db.String(36), db.ForeignKey("users.id"), nullable=True, index=True)
     action = db.Column(db.String(80), nullable=False)  # create | update | delete | login | login_failed

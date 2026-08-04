@@ -115,11 +115,16 @@ pnpm --filter @veblyss/web dev     # dev server on :3000
 </details>
 
 <details>
-<summary><strong>Datastores via Docker</strong></summary>
+<summary><strong>Full stack via Docker</strong></summary>
 
 ```bash
-docker compose up --build   # postgres + redis + api, all wired together
+docker compose up --build   # postgres + redis + api + web, all wired together
 ```
+
+`docker-compose.override.yml` (auto-merged, local-dev-only) publishes each service to its
+usual host port (`:5432`, `:6379`, `:4000`, `:3000`). `docker-compose.yml` alone — no
+`docker-compose.override.yml` — is what a host like Coolify deploys; see
+[Deployment](#deployment) below.
 </details>
 
 ## Testing
@@ -147,8 +152,10 @@ veblyss/
 │   └── api/           Flask REST API
 ├── docs/                Planning docs — architecture, sitemap, brand guide, content audit
 ├── Dockerfile.api          Container build for apps/api
-├── docker-compose.yml       Local postgres + redis + api orchestration
-└── start.sh                  One-command dev/prod orchestration
+├── Dockerfile.web           Container build for apps/web (self-hosted/Coolify — Vercel doesn't use this)
+├── docker-compose.yml         Full-stack orchestration — the file Coolify deploys
+├── docker-compose.override.yml Local-dev-only host port publishing (auto-merged)
+└── start.sh                      One-command dev/prod orchestration
 ```
 
 See [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md) for the full target architecture and
@@ -156,13 +163,26 @@ See [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md) for the full target architect
 
 ## Deployment
 
-- **Storefront** — deploys cleanly to Vercel (Next.js 15, App Router, zero extra config beyond `NEXT_PUBLIC_API_URL`).
-- **API** — ships as a container via `Dockerfile.api`; `docker-compose.yml` covers local orchestration as a starting point for a hosted deploy target.
+Two supported paths — pick one, don't run both against the same domain:
+
+- **Vercel + container host** — `apps/web` deploys to Vercel (Next.js 15, App Router, zero
+  extra config beyond `NEXT_PUBLIC_API_URL`); `apps/api` ships as a container via
+  `Dockerfile.api` to wherever you host it.
+- **Fully self-hosted (e.g. Coolify)** — `docker-compose.yml` deploys the whole stack
+  (`postgres`, `redis`, `api`, `web`) as one unit. No service publishes a fixed host
+  port — routing is meant to go through the platform's own reverse proxy (Coolify's
+  Traefik, or your own nginx/Caddy). Set `NEXT_PUBLIC_API_URL` as a **build arg** for
+  the `web` service (see the comment in `Dockerfile.web` — it's baked into the browser
+  bundle at build time, a runtime env var alone won't do it). The optional `cloudflared`
+  service is off by default (`profiles: ["tunnel"]`) — only enable it if a Cloudflare
+  Tunnel is deliberately replacing the platform's own ingress, not running alongside it.
 
 ## For maintainers
 
 Architecture deviations, gotchas already hit and fixed, and code conventions live in
 [`CONTRIBUTING.md`](CONTRIBUTING.md) — read that before making non-trivial changes.
+Before an actual production launch, work through [`PRODUCTION_CHECKLIST.md`](PRODUCTION_CHECKLIST.md)
+— what's already hardened vs. what still needs a real secret or infra decision.
 
 ## Known gaps
 

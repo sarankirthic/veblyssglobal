@@ -13,7 +13,7 @@ from app.extensions import db
 
 
 def load_current_user():
-    from app.models.user import User
+    from app.auth.models import User
 
     if g.get("current_user") is not None:
         return g.current_user

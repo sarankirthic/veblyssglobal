@@ -1,4 +1,4 @@
-// Mirrors app/*/to_dict() shapes in apps/api — see apps/api/app/models/*.py.
+// Mirrors app/*/to_dict() shapes in apps/api — see apps/api/app/*/models.py.
 // No shared codegen between Flask (Pydantic) and this app (TypeScript); keep
 // these in sync by hand. See apps/api/README.md "Deviations from the doc".
 

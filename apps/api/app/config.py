@@ -3,6 +3,11 @@ from datetime import timedelta
 
 
 class Config:
+    # Explicit, not relied on as Flask's implicit default — never want a
+    # deploy accidentally running with the interactive debugger/reloader on.
+    DEBUG = False
+    TESTING = False
+
     # Falls back to an obviously-unsafe dev default rather than crashing on import,
     # so `flask db init` / tests work without a .env file. Real deploys must set
     # these via environment — see .env.example.
@@ -29,6 +34,12 @@ class Config:
 
     REDIS_URL = os.environ.get("REDIS_URL", "")
 
+    # Rate-limit storage: shared Redis if configured, otherwise per-process
+    # memory (fine for a single gunicorn worker, NOT shared across `-w 4` —
+    # set REDIS_URL in any multi-worker/multi-instance deploy).
+    RATELIMIT_STORAGE_URI = REDIS_URL or "memory://"
+    RATELIMIT_HEADERS_ENABLED = True
+
     LOG_LEVEL = os.environ.get("LOG_LEVEL", "INFO")
 
     MAX_CONTENT_LENGTH = 15 * 1024 * 1024  # 15MB upload ceiling
@@ -41,3 +52,4 @@ class TestConfig(Config):
         "TEST_DATABASE_URL", "sqlite:///:memory:"
     )
     SESSION_COOKIE_SECURE = False
+    RATELIMIT_ENABLED = False  # limiter is a process-wide singleton; don't let one test's calls count against another's

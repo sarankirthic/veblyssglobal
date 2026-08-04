@@ -1,18 +1,17 @@
 from flask import jsonify
-from flask_openapi3 import APIBlueprint
 
+from app.auth.models import Role
 from app.common.auth_guards import require_role
 from app.common.errors import ApiError
-from app.extensions import db
-from app.models.contact import ContactSubmission
-from app.models.metric import MetricEvent
-from app.models.user import Role
+from app.contact import contact_bp
+from app.contact.models import ContactSubmission
+from app.extensions import db, limiter
+from app.metrics.models import MetricEvent
 from app.schemas.contact import ContactQuery, ContactSubmissionBody
-
-contact_bp = APIBlueprint("contact", __name__, url_prefix="/api/v1/contact")
 
 
 @contact_bp.post("")
+@limiter.limit("5 per minute")
 def submit(body: ContactSubmissionBody):
     """Public enquiry form endpoint — no auth required to submit."""
     submission = ContactSubmission(
@@ -26,7 +25,6 @@ def submit(body: ContactSubmissionBody):
     db.session.add(submission)
     db.session.add(MetricEvent(type="enquiry", path="/contact"))
     db.session.commit()
-
     return jsonify({"data": {"id": submission.id}}), 201
 
 

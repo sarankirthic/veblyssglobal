@@ -1,15 +1,21 @@
-# Local dev orchestration for apps/api + its datastores.
-# apps/web and apps/admin aren't built yet (see docs/ARCHITECTURE.md) — add
-# their services here once they exist, per the monorepo layout in §3.
+# Full-stack orchestration: postgres + redis + api + web. Written to run
+# equally well as `docker compose up` for local dev (see
+# docker-compose.override.yml, auto-merged, for host-port publishing) and as
+# a Coolify "Docker Compose" resource: no service here publishes a fixed host
+# port, since Coolify routes traffic through its own Traefik proxy on its own
+# internal network — a hardcoded `ports: "4000:4000"` fights that, and risks
+# colliding with other apps/services already using that port on a shared
+# Coolify host. `api`/`web` still declare a bare container port (Coolify
+# reads this to know what to route to); postgres/redis don't need one at all
+# — nothing outside this stack should reach them directly.
 services:
   postgres:
     image: postgres:16-alpine
+    restart: unless-stopped
     environment:
       POSTGRES_USER: veblyss
       POSTGRES_PASSWORD: veblyss
       POSTGRES_DB: veblyss
-    ports:
-      - "5432:5432"
     volumes:
       - veblyss_pg_data:/var/lib/postgresql/data
     healthcheck:
@@ -20,25 +26,56 @@ services:
 
   redis:
     image: redis:7-alpine
-    ports:
-      - "6379:6379"
+    restart: unless-stopped
 
   api:
     build:
       context: .
       dockerfile: Dockerfile.api
+    restart: unless-stopped
     env_file:
       - apps/api/.env
     environment:
       DATABASE_URL: postgresql+psycopg2://veblyss:veblyss@postgres:5432/veblyss
       REDIS_URL: redis://redis:6379/0
     ports:
-      - "4000:4000"
+      - "4000"
     depends_on:
       postgres:
         condition: service_healthy
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request,sys; sys.exit(0) if urllib.request.urlopen('http://127.0.0.1:4000/api/v1/health').status == 200 else sys.exit(1)"]
+      interval: 30s
+      timeout: 5s
+      start_period: 10s
+      retries: 3
 
+  web:
+    build:
+      context: .
+      dockerfile: Dockerfile.web
+      args:
+        # Build-time only — see the comment in Dockerfile.web on why this
+        # can't just be a runtime `environment:` entry. Point this at
+        # whatever hostname/domain Coolify (or you) will route to the `api`
+        # service — not `http://api:4000`, since this URL is also called
+        # directly from the customer's browser, which can't resolve
+        # Docker-internal service names.
+        NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL:-http://localhost:4000}
+    restart: unless-stopped
+    ports:
+      - "3000"
+    depends_on:
+      - api
+
+  # Optional: only starts with `docker compose --profile tunnel up`. Coolify
+  # already terminates TLS and routes domains through its own Traefik proxy —
+  # running a Cloudflare Tunnel in the same stack is redundant with that
+  # unless you're deliberately using the tunnel as ingress *instead* of
+  # Coolify's proxy. Decide which one is actually fronting traffic before
+  # enabling this; running both is more likely to conflict than help.
   cloudflared:
+    profiles: ["tunnel"]
     container_name: cloudflare-tunnel
     image: 'cloudflare/cloudflared:latest'
     restart: unless-stopped

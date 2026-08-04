@@ -1,0 +1,4 @@
+# Test/dev-only deps, on top of requirements.txt. Not installed in the
+# production image (Dockerfile.api installs requirements.txt only).
+-r requirements.txt
+pytest==8.3.3

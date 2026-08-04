@@ -37,7 +37,8 @@ had to change as a result of the framework swap.
 
 ## Module layout
 
-Matches ARCHITECTURE.md §5.1 exactly:
+Each feature module is self-contained — blueprint, models, and routes live
+together instead of in a central `models/`/`routes/` split:
 
 ```
 app/
@@ -48,17 +49,32 @@ app/
 ├── contact/             # public enquiry form + admin read
 ├── metrics/               # event ingestion, traffic/funnel/product/geo, activity log
 ├── settings/               # single source of truth for site-wide content
-├── models/                  # SQLAlchemy models (9 entities, one per file)
 ├── schemas/                  # Pydantic request/response schemas
-└── common/                    # auth guards, error handlers, logging, health check
+└── common/                    # auth guards, error handlers, logging, health check, shared model mixins
 ```
+
+Each `app/<module>/` follows the same internal layout (`app/auth/` is the
+template):
+
+```
+app/<module>/
+├── __init__.py     # defines the blueprint(s), then imports models.py + views.py to register them
+├── models.py       # SQLAlchemy models owned by this module
+├── views.py        # route handlers (decorate the bp imported from __init__)
+├── helpers/        # pure helper functions (no Flask context)
+└── workers/        # Celery background tasks (none wired up yet)
+```
+
+`media/` has no database models of its own (`models.py` is a stub — uploaded
+media is referenced by URL from `Product`/`GalleryImage` rows), and its R2
+client lives in `media/helpers/storage.py`.
 
 ## Running locally
 
 ```bash
 cd apps/api
 python3.12 -m venv .venv && source .venv/bin/activate
-pip install -r requirements.txt
+pip install -r requirements-dev.txt   # requirements.txt + pytest; prod images install requirements.txt only
 
 cp .env.example .env   # fill in real values — at minimum SECRET_KEY and DATABASE_URL
 
@@ -84,7 +100,7 @@ public read/contact surface, matching the doc). Create the first user directly:
 ```bash
 flask --app wsgi.py shell
 >>> from app.extensions import db
->>> from app.models.user import User, Role
+>>> from app.auth.models import User, Role
 >>> u = User(email="you@veblyssglobal.com", name="Your Name", role=Role.ADMIN)
 >>> u.set_password("choose-a-real-password")
 >>> db.session.add(u); db.session.commit()

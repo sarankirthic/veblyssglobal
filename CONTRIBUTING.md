@@ -97,6 +97,25 @@ other by hand, or the two apps will silently disagree about what's valid. Grep b
   requirement makes these admin-editable, that's a real schema change (new columns +
   Pydantic/Zod schema updates on both sides), not a one-line edit.
 
+## Security middleware (added during a production-hardening pass)
+
+- **Rate limiting** — `app/extensions.py::limiter` (Flask-Limiter). Applied per-route
+  via `@limiter.limit(...)`, currently on `POST /auth/login` and `POST /contact` only
+  — the two unauthenticated, abuse-prone endpoints. Storage backend is
+  `RATELIMIT_STORAGE_URI` in `config.py`, which is Redis if `REDIS_URL` is set,
+  otherwise in-memory. In-memory is per-process — if you ever run more than one
+  gunicorn worker/instance without Redis, each gets its own independent counter,
+  which quietly makes the limit N× more permissive than it looks. `TestConfig` sets
+  `RATELIMIT_ENABLED = False` — the limiter is a process-wide singleton, so without
+  this, an earlier test's requests would count against a later test's assertions.
+- **`ProxyFix`** in `app/__init__.py` — trusts one reverse-proxy hop for
+  `X-Forwarded-For`/`-Proto`/`-Host`. If a real deploy adds more hops (CDN → LB →
+  app), the `x_for`/`x_proto`/`x_host` counts need to go up, or `request.remote_addr`
+  (which the rate limiter keys on) will resolve to the wrong hop's IP.
+- **Security headers** — `app/common/security_headers.py`, plain `after_request`,
+  no new dependency (flask-talisman was considered and skipped — this is a JSON API
+  with no server-rendered HTML, so there's no CSP/inline-script surface to manage).
+
 ## Testing
 
 ```bash
@@ -119,13 +138,15 @@ main correctness signal for `apps/web`.
 ## Conventions
 
 **API (`apps/api/app/`)** — one folder per module (`auth/`, `products/`, `gallery/`,
-`media/`, `contact/`, `metrics/`, `settings/`), each with its own `routes.py` using
-`flask_openapi3.APIBlueprint` with Pydantic-typed `body`/`path`/`query` params. Models
-live in `app/models/` (one file per entity — 9 total), imported once in
-`app/models/__init__.py` purely for side effects (registers each model's metadata with
-SQLAlchemy so Alembic autogenerate and `db.create_all()` can see it — the `# noqa: F401`
-comments there are intentional, not oversight; a lint tool flagging them as "unused
-imports" is a false positive, don't "fix" it by removing the imports).
+`media/`, `contact/`, `metrics/`, `settings/`), each following the same internal layout:
+`__init__.py` defines the `flask_openapi3.APIBlueprint`(s) and then imports `models.py`
+and `views.py` for their side effects (registers SQLAlchemy metadata and routes on the
+blueprint — the `# noqa: F401` comments there are intentional, not oversight; a lint tool
+flagging them as "unused imports" is a false positive, don't "fix" it by removing the
+imports). `views.py` holds the route handlers with Pydantic-typed `body`/`path`/`query`
+params; `models.py` holds the module's SQLAlchemy models; `helpers/` and `workers/` are
+scaffolded per module for pure helper functions and future Celery tasks. Shared model
+mixins (`TimestampMixin`, `uuid_pk`) live in `app/common/mixins.py`.
 
 **Web (`apps/web/src/`)** — Server Components do direct async data fetching via
 `src/lib/data.ts` (no React Query needed there); Client Components (forms, nav toggle)
@@ -142,12 +163,35 @@ public signup route — create the first admin via `flask shell` (see
 
 ## Local dev orchestration
 
-`start.sh` (root) drives both apps for local dev/prod runs — see `README.md` for usage.
-It intentionally does **not** run nginx: `apps/web` targets Vercel for deployment and
-`apps/api` ships as a container (`Dockerfile.api`), so there's no single-VM
-reverse-proxy step to manage locally. If that deployment story changes (e.g. both apps
-end up self-hosted on one box), revisit that decision rather than assuming it still
-holds.
+`start.sh` (root) drives both apps directly on the host for local dev/prod runs (no
+Docker involved) — see `README.md` for usage. It intentionally does not run nginx:
+for host-run dev, `apps/web`'s `next dev`/`next start` and `apps/api`'s
+`flask run`/`gunicorn` are hit on their own ports directly, no reverse proxy needed.
+
+## Container/Coolify deployment
+
+`docker-compose.yml` is the file a platform like Coolify actually deploys — it's
+written for that: no service publishes a fixed host port (Coolify routes through its
+own Traefik proxy on its internal network; hardcoding `ports: "4000:4000"` would
+fight that and risks colliding with other apps on a shared host). `postgres`/`redis`
+don't declare a port at all — nothing outside the stack should reach them directly.
+`docker-compose.override.yml` is auto-merged by plain `docker compose up` and adds
+back fixed host-port publishing, but *only* for local convenience — Coolify (or
+anything deploying `docker-compose.yml` directly) never sees it.
+
+`Dockerfile.web` exists only for this self-hosted path — Vercel deploys of `apps/web`
+never use it, they use Vercel's own build pipeline. The one gotcha worth remembering:
+`NEXT_PUBLIC_API_URL` is read by `ContactForm.tsx`, a Client Component, so it's inlined
+into the browser bundle at **build** time, not read at container start. It has to be
+passed as a Docker build arg (`docker-compose.yml`'s `web.build.args`), not just a
+runtime `environment:` entry — the latter would only affect the Node server process,
+and the shipped browser JS would silently keep whatever URL (or lack of one) was
+baked in at image build time.
+
+The `cloudflared` service is `profiles: ["tunnel"]` — off by default. It was added to
+`docker-compose.yml` from outside this session's work; a Cloudflare Tunnel and
+Coolify's own Traefik proxy are two different ingress mechanisms, so decide which one
+is actually fronting traffic before enabling both.
 
 ## Where to look for content/copy decisions
 

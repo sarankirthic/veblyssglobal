@@ -1,0 +1,21 @@
+# Local-dev-only additions, auto-merged by `docker compose` (no -f needed).
+# Coolify (or any prod deploy reading docker-compose.yml directly) never
+# sees this file — it publishes fixed host ports purely for convenience
+# reaching services from the host machine during local development, e.g. a
+# host-run `flask db upgrade` connecting to postgres at localhost:5432.
+services:
+  postgres:
+    ports:
+      - "5432:5432"
+
+  redis:
+    ports:
+      - "6379:6379"
+
+  api:
+    ports:
+      - "4000:4000"
+
+  web:
+    ports:
+      - "3000:3000"

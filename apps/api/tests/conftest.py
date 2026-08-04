@@ -3,7 +3,7 @@ import pytest
 from app import create_app
 from app.config import TestConfig
 from app.extensions import db as _db
-from app.models.user import Role, User
+from app.auth.models import Role, User
 
 
 @pytest.fixture()

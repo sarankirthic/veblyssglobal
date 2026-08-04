@@ -1,0 +1,20 @@
+# Keep the build context small and fast. Dockerfile.api only COPYs apps/api/;
+# Dockerfile.web needs apps/web/ source (but not its build/install output).
+.git
+.idea
+.vercel
+.logs
+*.log
+.DS_Store
+
+node_modules
+apps/web/node_modules
+apps/web/.next
+apps/api/.venv
+apps/api/__pycache__
+apps/api/**/__pycache__
+apps/api/*.egg-info
+apps/api/.pytest_cache
+
+.env
+apps/*/.env*

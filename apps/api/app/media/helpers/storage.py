@@ -35,9 +35,7 @@ def upload_image(raw_bytes: bytes, filename_hint: str, folder: str = "products")
     """Process an uploaded image and store it in R2. Returns public URL + key."""
     cfg = current_app.config
     key = f"{folder}/{uuid.uuid4().hex}.webp"
-
     processed = _resize_and_encode_webp(raw_bytes)
-
     client = _r2_client()
     client.put_object(
         Bucket=cfg["R2_BUCKET_NAME"],
@@ -46,7 +44,6 @@ def upload_image(raw_bytes: bytes, filename_hint: str, folder: str = "products")
         ContentType="image/webp",
         CacheControl="public, max-age=31536000, immutable",
     )
-
     base_url = cfg["R2_PUBLIC_BASE_URL"].rstrip("/")
     return {"key": key, "url": f"{base_url}/{key}", "size": len(processed)}
 

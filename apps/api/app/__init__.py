@@ -2,12 +2,14 @@ import os
 
 from flask_cors import CORS
 from flask_openapi3 import Info, OpenAPI
+from werkzeug.middleware.proxy_fix import ProxyFix
 
 from app.common.errors import register_error_handlers
 from app.common.health import health_bp
 from app.common.logging import configure_logging
+from app.common.security_headers import register_security_headers
 from app.config import Config, TestConfig
-from app.extensions import db, migrate
+from app.extensions import db, limiter, migrate
 from app.seed import register_seed_command
 
 
@@ -26,24 +28,33 @@ def create_app(config_class=None):
     app = OpenAPI(__name__, info=info, doc_prefix="/api/docs")
     app.config.from_object(config_class)
 
+    # Trust exactly one reverse-proxy hop (nginx/Cloudflare/load balancer in
+    # front of gunicorn) for X-Forwarded-* — without this, request.scheme and
+    # client IPs (used by the rate limiter below) reflect the proxy, not the
+    # real client. Adjust the counts if the real deploy adds more hops.
+    app.wsgi_app = ProxyFix(app.wsgi_app, x_for=1, x_proto=1, x_host=1)
+
     db.init_app(app)
     migrate.init_app(app, db)
+    limiter.init_app(app)
 
     with app.app_context():
-        from app import models  # noqa: F401  (registers all tables with SQLAlchemy metadata)
+        # Each module's __init__.py defines its blueprint(s) and then imports
+        # its own models.py + views.py, registering SQLAlchemy tables and
+        # routes as a side effect of the import below.
+        from app.auth import auth_bp
+        from app.contact import contact_bp
+        from app.gallery import gallery_bp
+        from app.media import media_bp
+        from app.metrics import metrics_bp
+        from app.products import categories_bp, products_bp
+        from app.settings import settings_bp
 
     CORS(app, origins=app.config["CORS_ORIGINS"] or [], supports_credentials=True)
 
     configure_logging(app)
     register_error_handlers(app)
-
-    from app.auth.routes import auth_bp
-    from app.contact.routes import contact_bp
-    from app.gallery.routes import gallery_bp
-    from app.media.routes import media_bp
-    from app.metrics.routes import metrics_bp
-    from app.products.routes import categories_bp, products_bp
-    from app.settings.routes import settings_bp
+    register_security_headers(app)
 
     for bp in (
         health_bp,

@@ -2,15 +2,13 @@ from collections import Counter
 from datetime import datetime, timedelta, timezone
 
 from flask import jsonify
-from flask_openapi3 import APIBlueprint
 
+from app.auth.models import Role
 from app.common.auth_guards import require_role
 from app.extensions import db
-from app.models.metric import ActivityLog, MetricEvent
-from app.models.user import Role
+from app.metrics import metrics_bp
+from app.metrics.models import ActivityLog, MetricEvent
 from app.schemas.metrics import ActivityLogQuery, MetricEventBody, MetricsRangeQuery
-
-metrics_bp = APIBlueprint("metrics", __name__, url_prefix="/api/v1/metrics")
 
 
 @metrics_bp.post("/events")

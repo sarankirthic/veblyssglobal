@@ -8,6 +8,7 @@ design/.vercel
 # apps/api (Flask)
 apps/api/.venv/
 apps/api/.env
+/.env
 apps/api/__pycache__/
 apps/api/**/__pycache__/
 apps/api/*.egg-info/

@@ -6,9 +6,8 @@ import click
 from flask import Flask
 
 from app.extensions import db
-from app.models.category import Category
-from app.models.product import Product
-from app.models.setting import SiteSetting
+from app.products.models import Category, Product
+from app.settings.models import SiteSetting
 
 CATEGORIES = [
     {
