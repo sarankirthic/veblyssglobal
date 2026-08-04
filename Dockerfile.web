@@ -33,7 +33,7 @@ ENV NODE_ENV=production \
     PORT=3000 \
     HOSTNAME=0.0.0.0
 
-RUN useradd --create-home --uid 1000 veblyss
+RUN useradd --create-home --uid 1001 veblyss
 
 # output: "standalone" traces the minimal server + node_modules needed to run,
 # shaped to match outputFileTracingRoot (repo root) — hence apps/web/... below.
