@@ -35,7 +35,7 @@ export function ContactDetailsForm({ initial }: { initial: ContactDetails }) {
     <form onSubmit={submit} className="border border-adm-hairline bg-white p-6">
       <h3 className="mb-1 text-lg">Contact Details</h3>
       <p className="mb-4 text-xs text-adm-muted">
-        Single source of truth pulled by the public site's Contact page and footer.
+        Single source of truth pulled by the public site&apos;s Contact page and footer.
       </p>
       {status === "saved" ? (
         <div className="mb-4">
