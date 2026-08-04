@@ -21,12 +21,13 @@ COPY apps/api/requirements.txt .
 RUN pip install --user -r requirements.txt
 
 FROM base AS runtime
-COPY --from=builder /root/.local /root/.local
-ENV PATH=/root/.local/bin:$PATH
-
-COPY apps/api/ .
-
 RUN useradd --create-home --uid 1000 veblyss
+
+COPY --from=builder --chown=veblyss:veblyss /root/.local /home/veblyss/.local
+ENV PATH=/home/veblyss/.local/bin:$PATH
+
+COPY --chown=veblyss:veblyss apps/api/ .
+
 USER veblyss
 
 EXPOSE 4000
