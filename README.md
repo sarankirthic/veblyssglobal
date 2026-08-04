@@ -31,10 +31,12 @@ A two-app monorepo: a public storefront and the API behind it.
 
 | App | What it is | Stack |
 |---|---|---|
-| **`apps/web`** | Public storefront — everything a customer sees | Next.js 15 (App Router), React 19, TanStack Query, React Hook Form + Zod |
+| **`apps/web`** | Public storefront + admin panel (`/admin/*`) | Next.js 15 (App Router), React 19, TanStack Query, React Hook Form + Zod |
 | **`apps/api`** | REST API — products, gallery, contact, auth, media, metrics | Flask 3, SQLAlchemy 2 + Alembic, Pydantic v2, PostgreSQL |
 
-`apps/admin` (an internal admin panel + metrics dashboard) is designed in [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md) but not yet built.
+`docs/ARCHITECTURE.md` designs the admin panel as a separate `apps/admin` app. Per
+explicit request it instead lives inside `apps/web` at `/admin/*` — one Next.js app,
+one deploy. See `CONTRIBUTING.md` for the rationale.
 
 ## Features
 
@@ -122,7 +124,7 @@ docker compose up --build   # postgres + redis + api + web, all wired together
 ```
 
 `docker-compose.override.yml` (auto-merged, local-dev-only) publishes each service to its
-usual host port (`:5432`, `:6379`, `:4000`, `:3000`). `docker-compose.yml` alone — no
+usual host port (`:5432`, `:6379`, `:4000`, `:3000`). `docker-compose.yaml` alone — no
 `docker-compose.override.yml` — is what a host like Coolify deploys; see
 [Deployment](#deployment) below.
 </details>
@@ -153,7 +155,7 @@ veblyss/
 ├── docs/                Planning docs — architecture, sitemap, brand guide, content audit
 ├── Dockerfile.api          Container build for apps/api
 ├── Dockerfile.web           Container build for apps/web (self-hosted/Coolify — Vercel doesn't use this)
-├── docker-compose.yml         Full-stack orchestration — the file Coolify deploys
+├── docker-compose.yaml         Full-stack orchestration — the file Coolify deploys
 ├── docker-compose.override.yml Local-dev-only host port publishing (auto-merged)
 └── start.sh                      One-command dev/prod orchestration
 ```
@@ -168,7 +170,7 @@ Two supported paths — pick one, don't run both against the same domain:
 - **Vercel + container host** — `apps/web` deploys to Vercel (Next.js 15, App Router, zero
   extra config beyond `NEXT_PUBLIC_API_URL`); `apps/api` ships as a container via
   `Dockerfile.api` to wherever you host it.
-- **Fully self-hosted (e.g. Coolify)** — `docker-compose.yml` deploys the whole stack
+- **Fully self-hosted (e.g. Coolify)** — `docker-compose.yaml` deploys the whole stack
   (`postgres`, `redis`, `api`, `web`) as one unit. No service publishes a fixed host
   port — routing is meant to go through the platform's own reverse proxy (Coolify's
   Traefik, or your own nginx/Caddy). Set `NEXT_PUBLIC_API_URL` as a **build arg** for

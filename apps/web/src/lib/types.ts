@@ -67,9 +67,87 @@ export interface ContactDetails {
   londonAddress?: string;
 }
 
+export interface Differentiator {
+  title: string;
+  description: string;
+}
+
 export interface SiteSettings {
   contact_details?: ContactDetails;
-  differentiators?: { title: string; description: string }[];
+  differentiators?: Differentiator[];
   social_links?: Record<string, string>;
   site_meta?: Record<string, string>;
+}
+
+// --- Admin-only types (apps/web/src/app/admin) -----------------------------
+// Not consumed by the public site; kept here alongside the rest so the whole
+// API surface's shapes live in one file.
+
+export const ROLES = ["admin", "editor", "viewer"] as const;
+export type Role = (typeof ROLES)[number];
+
+export interface User {
+  id: string;
+  email: string;
+  name: string;
+  role: Role;
+  isActive: boolean;
+}
+
+export interface ContactSubmission {
+  id: string;
+  name: string;
+  email: string;
+  country: string | null;
+  interest: string | null;
+  message: string;
+  source: string;
+  createdAt: string;
+}
+
+export interface TrafficPoint {
+  date: string;
+  count: number;
+}
+
+export interface TrafficMetrics {
+  days: number;
+  total: number;
+  series: TrafficPoint[];
+}
+
+export interface FunnelMetrics {
+  days: number;
+  pageviews: number;
+  productViews: number;
+  enquiries: number;
+}
+
+export interface ProductPerformanceRow {
+  path: string;
+  views: number;
+}
+
+export interface ProductPerformanceMetrics {
+  days: number;
+  top: ProductPerformanceRow[];
+}
+
+export interface GeoRow {
+  country: string;
+  count: number;
+}
+
+export interface GeoMetrics {
+  days: number;
+  breakdown: GeoRow[];
+}
+
+export interface ActivityLogEntry {
+  id: string;
+  userId: string | null;
+  action: string;
+  entity: string;
+  entityId: string | null;
+  createdAt: string;
 }

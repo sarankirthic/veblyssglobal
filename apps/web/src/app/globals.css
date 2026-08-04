@@ -16,6 +16,23 @@
   --font-head: var(--font-dm-serif-display), Georgia, serif;
   --font-body: var(--font-dm-sans), system-ui, sans-serif;
   --font-mono-stack: var(--font-dm-mono), ui-monospace, monospace;
+
+  /* Admin panel (/admin) tokens — Navy/Gold per docs/BRAND.md §8. Prefixed
+     adm- and scoped under .admin-app below so they never collide with the
+     public site's tokens above, which intentionally use a different palette
+     (see CONTRIBUTING.md — that divergence predates the admin panel and
+     isn't this file's problem to fix). */
+  --adm-navy: #12233f;
+  --adm-navy-support: #1b3a63;
+  --adm-gold: #b08d57;
+  --adm-neutral-light: #f2f2f0;
+  --adm-ink: #1a1a1a;
+  --adm-muted: #6b6e76;
+  --adm-hairline: #dcdcd8;
+  --adm-danger: #b3261e;
+  --adm-success: #2e7d32;
+  --adm-font-head: Cambria, Georgia, "Times New Roman", serif;
+  --adm-font-body: Calibri, "Segoe UI", system-ui, sans-serif;
 }
 
 @theme inline {
@@ -30,6 +47,39 @@
   --font-head: var(--font-head);
   --font-body: var(--font-body);
   --font-mono: var(--font-mono-stack);
+
+  --color-adm-navy: var(--adm-navy);
+  --color-adm-navy-support: var(--adm-navy-support);
+  --color-adm-gold: var(--adm-gold);
+  --color-adm-neutral-light: var(--adm-neutral-light);
+  --color-adm-ink: var(--adm-ink);
+  --color-adm-muted: var(--adm-muted);
+  --color-adm-hairline: var(--adm-hairline);
+  --color-adm-danger: var(--adm-danger);
+  --color-adm-success: var(--adm-success);
+  --font-adm-head: var(--adm-font-head);
+  --font-adm-body: var(--adm-font-body);
+}
+
+/* Scope root for everything under /admin — swaps in the Navy/Gold palette
+   and Cambria/Calibri type without touching the public site's <body>. */
+.admin-app {
+  min-height: 100vh;
+  font-family: var(--adm-font-body);
+  color: var(--adm-ink);
+  background: var(--adm-neutral-light);
+}
+.admin-app h1,
+.admin-app h2,
+.admin-app h3,
+.admin-app h4 {
+  font-family: var(--adm-font-head);
+  font-weight: 400;
+  margin: 0;
+}
+.admin-app table {
+  border-collapse: collapse;
+  width: 100%;
 }
 
 * {

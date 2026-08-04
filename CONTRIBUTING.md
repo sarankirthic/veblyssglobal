@@ -14,9 +14,17 @@ apps/
 docs/        Planning docs — still the source of truth for content/structure decisions
 ```
 
-`apps/admin` (Next.js admin panel + metrics dashboard, per `docs/ARCHITECTURE.md`) doesn't
-exist yet. If you're building it, read that doc's admin section first and confirm scope —
-it's the one piece of the original plan still unbuilt.
+**No separate `apps/admin`.** `docs/ARCHITECTURE.md` §3/§4.2 specifies a standalone
+Next.js admin app on its own port/deploy. Per explicit request, the admin panel + metrics
+dashboard instead live inside `apps/web` at `/admin/*` (`apps/web/src/app/admin/`,
+`components/admin/`, `lib/admin/`) — one Next.js app, one deploy, same origin as the
+public site so there's no separate CORS/session-cookie dance between two ports. The
+public site's pages moved under `apps/web/src/app/(site)/` (a route group — doesn't
+change their URLs) with their own `layout.tsx` carrying the public Header/Footer;
+`/admin/*` gets a different layout tree with no public chrome. Design tokens for the
+admin UI (Navy/Gold, Cambria/Calibri per `docs/BRAND.md` §8) are prefixed `--adm-*` in
+`globals.css` and scoped under a `.admin-app` wrapper class so they don't collide with
+or override the public site's own (differently-themed) tokens sharing that same file.
 
 There used to be a hand-written static HTML site at repo root (`index.html`,
 `products/*.html`, `assets/`), built before `apps/web` existed, during an early
@@ -170,26 +178,26 @@ for host-run dev, `apps/web`'s `next dev`/`next start` and `apps/api`'s
 
 ## Container/Coolify deployment
 
-`docker-compose.yml` is the file a platform like Coolify actually deploys — it's
+`docker-compose.yaml` is the file a platform like Coolify actually deploys — it's
 written for that: no service publishes a fixed host port (Coolify routes through its
 own Traefik proxy on its internal network; hardcoding `ports: "4000:4000"` would
 fight that and risks colliding with other apps on a shared host). `postgres`/`redis`
 don't declare a port at all — nothing outside the stack should reach them directly.
 `docker-compose.override.yml` is auto-merged by plain `docker compose up` and adds
 back fixed host-port publishing, but *only* for local convenience — Coolify (or
-anything deploying `docker-compose.yml` directly) never sees it.
+anything deploying `docker-compose.yaml` directly) never sees it.
 
 `Dockerfile.web` exists only for this self-hosted path — Vercel deploys of `apps/web`
 never use it, they use Vercel's own build pipeline. The one gotcha worth remembering:
 `NEXT_PUBLIC_API_URL` is read by `ContactForm.tsx`, a Client Component, so it's inlined
 into the browser bundle at **build** time, not read at container start. It has to be
-passed as a Docker build arg (`docker-compose.yml`'s `web.build.args`), not just a
+passed as a Docker build arg (`docker-compose.yaml`'s `web.build.args`), not just a
 runtime `environment:` entry — the latter would only affect the Node server process,
 and the shipped browser JS would silently keep whatever URL (or lack of one) was
 baked in at image build time.
 
 The `cloudflared` service is `profiles: ["tunnel"]` — off by default. It was added to
-`docker-compose.yml` from outside this session's work; a Cloudflare Tunnel and
+`docker-compose.yaml` from outside this session's work; a Cloudflare Tunnel and
 Coolify's own Traefik proxy are two different ingress mechanisms, so decide which one
 is actually fronting traffic before enabling both.
 

@@ -17,7 +17,7 @@ ENV NEXT_TELEMETRY_DISABLED=1
 # NEXT_PUBLIC_* vars are inlined into the client JS bundle at build time —
 # ContactForm.tsx is a Client Component that calls the API directly from the
 # browser, so this MUST be a build arg, not just a runtime `environment:` in
-# docker-compose.yml (that would only affect the server-side process, and the
+# docker-compose.yaml (that would only affect the server-side process, and the
 # browser bundle would silently fall back to localhost:4000).
 ARG NEXT_PUBLIC_API_URL
 ENV NEXT_PUBLIC_API_URL=$NEXT_PUBLIC_API_URL

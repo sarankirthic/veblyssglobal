@@ -26,9 +26,10 @@ had to change as a result of the framework swap.
   Zod schema consumed by `web`, `admin`, and `api`. Once `api` is Python, it
   can't import a TypeScript schema. This service defines its own Pydantic
   schemas (`app/schemas/`) that mirror the field names and constraints of what
-  the Zod schemas *would* be. **If/when `apps/web` and `apps/admin` are built,
-  their Zod schemas need to be kept in sync with these by hand** — there's no
-  automatic bridge. Worth revisiting if drift becomes a real problem (e.g.
+  the Zod schemas *would* be. **`apps/web`'s Zod schemas (including the admin
+  panel at `apps/web/src/app/admin/`, which lives in this same Next.js app —
+  see `CONTRIBUTING.md`) need to be kept in sync with these by hand** — there's
+  no automatic bridge. Worth revisiting if drift becomes a real problem (e.g.
   generating one from the other via `pydantic-to-typescript` or an OpenAPI
   client generator pointed at `/api/docs/openapi.json`).
 - **RBAC roles**: `admin`, `editor`, `viewer` are implemented (the doc says
@@ -78,7 +79,7 @@ pip install -r requirements-dev.txt   # requirements.txt + pytest; prod images i
 
 cp .env.example .env   # fill in real values — at minimum SECRET_KEY and DATABASE_URL
 
-flask --app wsgi.py db upgrade   # apply migrations (needs a running Postgres — see docker-compose.yml)
+flask --app wsgi.py db upgrade   # apply migrations (needs a running Postgres — see docker-compose.yaml)
 python wsgi.py                    # dev server on :4000, or:
 gunicorn --bind 0.0.0.0:4000 wsgi:app
 ```

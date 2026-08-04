@@ -19,7 +19,7 @@ exactly that, not "implemented but untested."
 - **`.dockerignore`** added — without it, `Dockerfile.api`'s `COPY apps/api/ .` would
   have baked a local `apps/api/.env` (real secrets) straight into the image.
 - **`Dockerfile.api`** already ran as a non-root user and had an image-level
-  healthcheck before this pass; `docker-compose.yml` now also has matching
+  healthcheck before this pass; `docker-compose.yaml` now also has matching
   `restart: unless-stopped` and a compose-level healthcheck on `api`, `postgres`,
   `redis`.
 - **`next.config.ts`** image `remotePatterns` restricted to the real R2 media
@@ -31,16 +31,16 @@ exactly that, not "implemented but untested."
   env-driven (no wildcard), `SECRET_KEY` already refuses to silently work with an
   obviously-fake value in code review (see below — it still needs a *real* value).
 - **`apps/web` containerized** — `Dockerfile.web` (standalone Next.js build,
-  non-root, healthcheck) and a `web` service in `docker-compose.yml`, so the whole
+  non-root, healthcheck) and a `web` service in `docker-compose.yaml`, so the whole
   stack (`postgres`, `redis`, `api`, `web`) can deploy as one Coolify/Docker Compose
   resource, not just `apps/api` — see the [Deployment](README.md#deployment) section
   of the README for the two supported paths.
-- **`docker-compose.yml` reshaped for Coolify** — no service publishes a fixed host
+- **`docker-compose.yaml` reshaped for Coolify** — no service publishes a fixed host
   port anymore (was `5432:5432`, `6379:6379`, `4000:4000`, fighting Coolify's own
   Traefik-based routing and risking port collisions on a shared host).
   `docker-compose.override.yml` (new) restores those fixed ports, but only for local
   `docker compose up` — Coolify never reads that file.
-- **`cloudflared` made opt-in** (`profiles: ["tunnel"]`) — it was in `docker-compose.yml`
+- **`cloudflared` made opt-in** (`profiles: ["tunnel"]`) — it was in `docker-compose.yaml`
   from outside this session's work, unconditionally on; running it alongside Coolify's
   own ingress is more likely to conflict than help, so it no longer starts by default.
 
@@ -52,13 +52,13 @@ exactly that, not "implemented but untested."
 - [ ] `CORS_ORIGINS` — the real `apps/web` production domain(s), not `localhost`
 - [ ] `R2_ACCOUNT_ID` / `R2_ACCESS_KEY_ID` / `R2_SECRET_ACCESS_KEY` — currently empty; media upload silently doesn't work without these
 - [ ] `CLOUDFLARE_TUNNEL_TOKEN` (root `.env`) — only relevant if you deliberately enable the opt-in `cloudflared` service (`docker compose --profile tunnel up`); leave it unset otherwise
-- [ ] `NEXT_PUBLIC_API_URL` — real API domain. Set as a Vercel env var if deploying `apps/web` there, **or** as `docker-compose.yml`'s `web.build.args.NEXT_PUBLIC_API_URL` if self-hosting — it's a build-time value either way, see `Dockerfile.web`
+- [ ] `NEXT_PUBLIC_API_URL` — real API domain. Set as a Vercel env var if deploying `apps/web` there, **or** as `docker-compose.yaml`'s `web.build.args.NEXT_PUBLIC_API_URL` if self-hosting — it's a build-time value either way, see `Dockerfile.web`
 
 **Infrastructure decisions — not made yet:**
 - [ ] **Which deployment path.** `README.md`'s Deployment section lays out two:
   Vercel (web) + a container host (api), or everything self-hosted via
-  `docker-compose.yml` (e.g. Coolify). Pick one per environment — don't end up with
-  both `apps/web` on Vercel *and* the `web` service in `docker-compose.yml` live at
+  `docker-compose.yaml` (e.g. Coolify). Pick one per environment — don't end up with
+  both `apps/web` on Vercel *and* the `web` service in `docker-compose.yaml` live at
   the same time, serving the same domain.
 - [ ] If self-hosting via Coolify: when you add this repo as a "Docker Compose"
   resource, Coolify's UI will ask which domain/FQDN routes to which service (`api`,
@@ -84,8 +84,10 @@ exactly that, not "implemented but untested."
 - No CI pipeline (lint/test/build on push) — nothing currently gates a bad commit before deploy.
 - No log aggregation beyond stdout JSON — fine if your host captures stdout (most
   container platforms do), not fine if you need searchable logs long-term.
-- `apps/admin` doesn't exist yet (see `CLAUDE.md`) — if the metrics dashboard or
-  CMS-editing workflow is needed for launch, that's a separate build, not a config toggle.
+- The admin panel + metrics dashboard (`apps/web/src/app/admin/`) is built and gated
+  behind session auth + RBAC, but hasn't been through a security/UX review pass the way
+  the public site and API hardening in this checklist has — treat it as functional, not
+  yet production-audited, before pointing real admin users at it.
 - Real business content still has placeholders — pricing, delivery windows, return
   policy, payment methods, founder quote — tracked in [`TODO.md`](TODO.md). These are
   deliberate honest placeholders, not something this pass touches.
