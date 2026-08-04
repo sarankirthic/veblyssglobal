@@ -24,6 +24,7 @@ ENV NEXT_PUBLIC_API_URL=$NEXT_PUBLIC_API_URL
 COPY --from=deps /repo/node_modules ./node_modules
 COPY package.json pnpm-lock.yaml pnpm-workspace.yaml turbo.json ./
 COPY apps/web ./apps/web
+COPY --from=deps /repo/apps/web/node_modules ./apps/web/node_modules
 RUN pnpm --filter @veblyss/web build
 
 FROM base AS runtime
