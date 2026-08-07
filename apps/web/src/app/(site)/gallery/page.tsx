@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { getGalleryAlbums, getGalleryProducts } from "@/lib/data";
+import { getCategories, getGalleryAlbums, getGalleryProducts } from "@/lib/data";
 import { CtaBand } from "@/components/layout/CtaBand";
 
 export const metadata: Metadata = {
@@ -20,11 +20,17 @@ const PLACEHOLDER_TILES = [
 const FILTERS = ["All", "Workshops", "Products", "Packaging", "Artisans", "In the Home", "Behind the Scenes", "Customer Moments"];
 
 export default async function GalleryPage() {
-  const [albums, galleryProducts] = await Promise.all([getGalleryAlbums(), getGalleryProducts()]);
+  const [albums, galleryProducts, categories] = await Promise.all([
+    getGalleryAlbums(),
+    getGalleryProducts(),
+    getCategories(),
+  ]);
+  const categorySlugById = new Map(categories.map((c) => [c.id, c.slug]));
   const albumImages = albums.flatMap((a) => a.images ?? []);
-  const productTiles = galleryProducts.flatMap((p) =>
-    p.images.map((url, i) => ({ url, alt: p.name, slug: p.slug, key: `${p.id}-${i}` }))
-  );
+  const productTiles = galleryProducts.flatMap((p) => {
+    const categorySlug = categorySlugById.get(p.categoryId);
+    return p.images.map((url, i) => ({ url, alt: p.name, categorySlug, key: `${p.id}-${i}` }));
+  });
   const hasRealImages = albumImages.length > 0 || productTiles.length > 0;
 
   return (
@@ -54,12 +60,17 @@ export default async function GalleryPage() {
                 // eslint-disable-next-line @next/next/no-img-element
                 <img key={img.id} src={img.url} alt={img.altText ?? ""} style={{ aspectRatio: "1", objectFit: "cover", border: "1px solid var(--border)" }} />
               ))}
-              {productTiles.map((tile) => (
-                <Link key={tile.key} href={`/products/${tile.slug}`}>
-                  {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img src={tile.url} alt={tile.alt} style={{ aspectRatio: "1", objectFit: "cover", border: "1px solid var(--border)" }} />
-                </Link>
-              ))}
+              {productTiles.map((tile) =>
+                tile.categorySlug ? (
+                  <Link key={tile.key} href={`/products/${tile.categorySlug}`}>
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img src={tile.url} alt={tile.alt} style={{ aspectRatio: "1", objectFit: "cover", border: "1px solid var(--border)" }} />
+                  </Link>
+                ) : (
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img key={tile.key} src={tile.url} alt={tile.alt} style={{ aspectRatio: "1", objectFit: "cover", border: "1px solid var(--border)" }} />
+                )
+              )}
             </div>
           ) : (
             <div className="gallery-grid" style={{ gridTemplateColumns: "repeat(3,1fr)" }}>
