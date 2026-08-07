@@ -49,6 +49,20 @@ def test_create_and_fetch_product(client, auth_client):
     assert get_resp.json["data"]["category"] == "Leather Goods"
 
 
+def test_product_defaults_show_in_gallery_false(client, auth_client):
+    category = _create_category(auth_client)
+    resp = auth_client.post(
+        "/api/v1/products",
+        json={
+            "categoryId": category["id"],
+            "name": "Leather Portfolio",
+            "slug": "leather-portfolio-gallery-default",
+        },
+    )
+    assert resp.status_code == 201
+    assert resp.json["data"]["showInGallery"] is False
+
+
 def test_unpublished_product_hidden_from_public(client, auth_client):
     category = _create_category(auth_client)
     resp = auth_client.post(

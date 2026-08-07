@@ -45,6 +45,7 @@ class Product(db.Model, TimestampMixin):
     images = db.Column(JsonType, nullable=False, default=list)
     featured = db.Column(db.Boolean, nullable=False, default=False)
     is_published = db.Column(db.Boolean, nullable=False, default=True)
+    show_in_gallery = db.Column(db.Boolean, nullable=False, default=False)
     category = db.relationship("Category", back_populates="products")
 
     def to_dict(self) -> dict:
@@ -66,4 +67,5 @@ class Product(db.Model, TimestampMixin):
             "images": self.images or [],
             "featured": self.featured,
             "isPublished": self.is_published,
+            "showInGallery": self.show_in_gallery,
         }
