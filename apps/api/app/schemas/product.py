@@ -36,6 +36,7 @@ class ProductBody(BaseModel):
     images: list[str] = Field(default_factory=list)
     featured: bool = False
     isPublished: bool = True
+    showInGallery: bool = False
 
 
 class ProductPath(BaseModel):
@@ -45,6 +46,7 @@ class ProductPath(BaseModel):
 class ProductQuery(BaseModel):
     category: Optional[str] = None
     featured: Optional[bool] = None
+    show_in_gallery: Optional[bool] = None
     published_only: bool = True
     page: int = Field(default=1, ge=1)
     per_page: int = Field(default=24, ge=1, le=100)
