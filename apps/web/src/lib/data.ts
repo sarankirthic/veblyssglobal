@@ -77,6 +77,16 @@ export async function getGalleryAlbums(): Promise<GalleryAlbum[]> {
   });
 }
 
+export async function getGalleryProducts(): Promise<Product[]> {
+  return safeList(async () => {
+    const res = await apiFetch<{ data: Product[]; meta: PageMeta }>(
+      "/api/v1/products?show_in_gallery=true&per_page=100",
+      { revalidate: 300 }
+    );
+    return res.data;
+  });
+}
+
 export async function submitContactForm(payload: {
   name: string;
   email: string;

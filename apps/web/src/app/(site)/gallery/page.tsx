@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { getGalleryAlbums } from "@/lib/data";
+import { getGalleryAlbums, getGalleryProducts } from "@/lib/data";
 import { CtaBand } from "@/components/layout/CtaBand";
 
 export const metadata: Metadata = {
@@ -20,8 +20,12 @@ const PLACEHOLDER_TILES = [
 const FILTERS = ["All", "Workshops", "Products", "Packaging", "Artisans", "In the Home", "Behind the Scenes", "Customer Moments"];
 
 export default async function GalleryPage() {
-  const albums = await getGalleryAlbums();
-  const hasRealImages = albums.some((a) => (a.images?.length ?? 0) > 0);
+  const [albums, galleryProducts] = await Promise.all([getGalleryAlbums(), getGalleryProducts()]);
+  const albumImages = albums.flatMap((a) => a.images ?? []);
+  const productTiles = galleryProducts.flatMap((p) =>
+    p.images.map((url, i) => ({ url, alt: p.name, slug: p.slug, key: `${p.id}-${i}` }))
+  );
+  const hasRealImages = albumImages.length > 0 || productTiles.length > 0;
 
   return (
     <>
@@ -46,9 +50,15 @@ export default async function GalleryPage() {
         <div className="wrap">
           {hasRealImages ? (
             <div className="gallery-grid" style={{ gridTemplateColumns: "repeat(3,1fr)" }}>
-              {albums.flatMap((a) => a.images ?? []).map((img) => (
+              {albumImages.map((img) => (
                 // eslint-disable-next-line @next/next/no-img-element
                 <img key={img.id} src={img.url} alt={img.altText ?? ""} style={{ aspectRatio: "1", objectFit: "cover", border: "1px solid var(--border)" }} />
+              ))}
+              {productTiles.map((tile) => (
+                <Link key={tile.key} href={`/products/${tile.slug}`}>
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img src={tile.url} alt={tile.alt} style={{ aspectRatio: "1", objectFit: "cover", border: "1px solid var(--border)" }} />
+                </Link>
               ))}
             </div>
           ) : (
