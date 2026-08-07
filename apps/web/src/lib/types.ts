@@ -34,6 +34,7 @@ export interface Product {
   images: string[];
   featured: boolean;
   isPublished: boolean;
+  showInGallery: boolean;
 }
 
 export interface GalleryImage {

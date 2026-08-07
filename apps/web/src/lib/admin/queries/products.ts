@@ -78,6 +78,7 @@ export type ProductInput = {
   images: string[];
   featured: boolean;
   isPublished: boolean;
+  showInGallery: boolean;
 };
 
 export function useCreateProduct() {

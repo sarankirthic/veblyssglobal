@@ -35,6 +35,7 @@ const schema = z.object({
   specs: z.array(z.object({ key: z.string().min(1), value: z.string().min(1) })),
   featured: z.boolean(),
   isPublished: z.boolean(),
+  showInGallery: z.boolean(),
 });
 type FormValues = z.infer<typeof schema>;
 
@@ -73,6 +74,7 @@ export function ProductForm({
       specs: initial?.specs ?? [],
       featured: initial?.featured ?? false,
       isPublished: initial?.isPublished ?? true,
+      showInGallery: initial?.showInGallery ?? false,
     },
   });
   const specFields = useFieldArray({ control, name: "specs" });
@@ -185,6 +187,9 @@ export function ProductForm({
         </label>
         <label className="flex items-center gap-2 text-sm">
           <input type="checkbox" {...register("isPublished")} /> Published
+        </label>
+        <label className="flex items-center gap-2 text-sm">
+          <input type="checkbox" {...register("showInGallery")} /> Show in Gallery
         </label>
       </div>
 
