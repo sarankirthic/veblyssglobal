@@ -81,7 +81,7 @@ services:
     restart: unless-stopped
     command: 'tunnel --no-autoupdate run'
     environment:
-      - 'TUNNEL_TOKEN=${CLOUDFLARE_TUNNEL_TOKEN?set in .env}'
+      - 'CLOUDFLARE_TUNNEL_TOKEN=${CLOUDFLARE_TUNNEL_TOKEN?set in .env}'
 
 volumes:
   veblyss_pg_data:
