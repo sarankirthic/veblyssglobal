@@ -1,4 +1,8 @@
-const API_URL = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:4000";
+// See apps/web/src/lib/api.ts for why this branches on server vs. client.
+const API_URL =
+  typeof window === "undefined"
+    ? process.env.INTERNAL_API_URL ?? process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:4000"
+    : process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:4000";
 
 export class ApiRequestError extends Error {
   status: number;

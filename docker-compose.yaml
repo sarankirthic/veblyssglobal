@@ -63,6 +63,11 @@ services:
         # Docker-internal service names.
         NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL:-http://localhost:4000}
     restart: unless-stopped
+    environment:
+      # Runtime-only, server-side fetches — reaches the api container directly
+      # over the compose network instead of round-tripping through public
+      # DNS/the Cloudflare Tunnel. Safe to hardcode: same network, every env.
+      INTERNAL_API_URL: http://veblyss.api:4000
     ports:
       - "3000"
     depends_on:

@@ -1,4 +1,12 @@
-const API_URL = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:4000";
+// Server-side code runs inside the same Docker network as the API container
+// and should reach it directly rather than round-tripping through public
+// DNS/the Cloudflare Tunnel. INTERNAL_API_URL is a plain runtime env var (no
+// NEXT_PUBLIC_ prefix — never bundled into client JS). Client-side code
+// always uses NEXT_PUBLIC_API_URL since it runs in the customer's browser.
+const API_URL =
+  typeof window === "undefined"
+    ? process.env.INTERNAL_API_URL ?? process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:4000"
+    : process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:4000";
 
 export class ApiRequestError extends Error {
   status: number;

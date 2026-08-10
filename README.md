@@ -183,9 +183,13 @@ Two supported paths — pick one, don't run both against the same domain:
   port — routing is meant to go through the platform's own reverse proxy (Coolify's
   Traefik, or your own nginx/Caddy). Set `NEXT_PUBLIC_API_URL` as a **build arg** for
   the `web` service (see the comment in `Dockerfile.web` — it's baked into the browser
-  bundle at build time, a runtime env var alone won't do it). The optional `cloudflared`
-  service is off by default (`profiles: ["tunnel"]`) — only enable it if a Cloudflare
-  Tunnel is deliberately replacing the platform's own ingress, not running alongside it.
+  bundle at build time, a runtime env var alone won't do it). `web`'s server-side fetches
+  (SSR, admin pages) use `INTERNAL_API_URL` instead — hardcoded in `docker-compose.yaml`
+  to the compose network's `veblyss.api` service name, so they never leave the Docker
+  network or depend on public DNS/the tunnel being up; only browser-side fetches need
+  `NEXT_PUBLIC_API_URL` to resolve. The optional `cloudflared` service is off by default
+  (`profiles: ["tunnel"]`) — only enable it if a Cloudflare Tunnel is deliberately
+  replacing the platform's own ingress, not running alongside it.
 
 ## Production operations
 
