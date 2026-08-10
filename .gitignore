@@ -26,5 +26,6 @@ docs/
 CLAUDE.md
 TODO.md
 .superpowers/
-assets/
+
+/assets/
 redesign/
