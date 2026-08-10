@@ -1,4 +1,4 @@
-from typing import Optional
+from typing import Annotated, Optional
 
 from pydantic import BaseModel, Field
 
@@ -14,6 +14,10 @@ class CategoryBody(BaseModel):
     description: Optional[str] = None
     originRegion: Optional[str] = Field(default=None, max_length=120)
     displayOrder: int = 0
+    heroHeadline: Optional[str] = Field(default=None, max_length=200)
+    whyChoose: list[Annotated[str, Field(max_length=300)]] = Field(default_factory=list, max_length=20)
+    guarantee: Optional[str] = Field(default=None, max_length=500)
+    idealFor: list[Annotated[str, Field(max_length=80)]] = Field(default_factory=list, max_length=20)
 
 
 class CategoryPath(BaseModel):
@@ -37,6 +41,10 @@ class ProductBody(BaseModel):
     featured: bool = False
     isPublished: bool = True
     showInGallery: bool = False
+    heroHeadline: Optional[str] = Field(default=None, max_length=200)
+    whyChoose: list[Annotated[str, Field(max_length=300)]] = Field(default_factory=list, max_length=20)
+    guarantee: Optional[str] = Field(default=None, max_length=500)
+    idealFor: list[Annotated[str, Field(max_length=80)]] = Field(default_factory=list, max_length=20)
 
 
 class ProductPath(BaseModel):
@@ -45,6 +53,7 @@ class ProductPath(BaseModel):
 
 class ProductQuery(BaseModel):
     category: Optional[str] = None
+    slug: Optional[str] = None
     featured: Optional[bool] = None
     show_in_gallery: Optional[bool] = None
     published_only: bool = True

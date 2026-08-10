@@ -96,7 +96,16 @@ Health check: `http://localhost:4000/api/v1/health`
 ## Creating the first admin user
 
 There's no public signup route (this is an admin-only API surface plus a
-public read/contact surface, matching the doc). Create the first user directly:
+public read/contact surface, matching the doc). Use the `create-admin` CLI
+command (`app/auth/cli.py`) — idempotent, safe to re-run to reset a password
+or role:
+
+```bash
+flask --app wsgi.py create-admin --email you@veblyssglobal.com --name "Your Name" --password "choose-a-real-password"
+# optional: --role admin|editor|viewer (defaults to admin)
+```
+
+Equivalent, if you'd rather do it by hand:
 
 ```bash
 flask --app wsgi.py shell
@@ -114,8 +123,9 @@ pytest -q
 ```
 
 Uses an in-memory SQLite DB (`app/config.py::TestConfig`) — no Postgres needed
-to run the suite. 13 tests cover auth/session lifecycle, RBAC guards,
-categories/products CRUD, contact submission, and settings.
+to run the suite. 17 tests cover auth/session lifecycle, RBAC guards,
+categories/products CRUD (including the `showInGallery` field/filter), contact
+submission, and settings.
 
 ## Migrations
 

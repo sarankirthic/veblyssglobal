@@ -13,7 +13,7 @@ export async function Header() {
       <div className="wrap nav">
         <div className="brand">
           <Link href="/" className="brand-logo">
-            <Image src="/logo.png" alt="VeBlyss" width={112} height={28} className="logo" priority />
+            <Image src="/wordmark.svg" alt="VeBlyss" width={93} height={56} className="logo" priority />
           </Link>
           <span className="est">India · UK</span>
         </div>
@@ -34,9 +34,7 @@ export async function Header() {
               )}
             </div>
           </span>
-          <NavLink href="/occasions">Shop by Occasion</NavLink>
           <NavLink href="/gallery">Gallery</NavLink>
-          <NavLink href="/blog">Blog</NavLink>
           <Link className="btn btn-primary" href="/contact">
             Get in Touch
           </Link>

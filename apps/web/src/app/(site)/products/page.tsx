@@ -1,6 +1,6 @@
 import Link from "next/link";
 import type { Metadata } from "next";
-import { getCategories } from "@/lib/data";
+import { getCategories, getProducts } from "@/lib/data";
 import { getCategoryContent } from "@/lib/category-content";
 import { PageHero } from "@/components/layout/PageHero";
 import { CtaBand } from "@/components/layout/CtaBand";
@@ -12,7 +12,16 @@ export const metadata: Metadata = {
 };
 
 export default async function ProductsIndexPage() {
-  const categories = await getCategories();
+  const [categories, { items: allProducts }] = await Promise.all([
+    getCategories(),
+    getProducts({ perPage: 100 }),
+  ]);
+
+  const thumbByCategory = new Map<string, string>();
+  for (const p of allProducts) {
+    if (!p.images[0]) continue;
+    if (!thumbByCategory.has(p.categoryId) || p.featured) thumbByCategory.set(p.categoryId, p.images[0]);
+  }
 
   return (
     <>
@@ -35,7 +44,17 @@ export default async function ProductsIndexPage() {
                 const content = getCategoryContent(c.slug);
                 return (
                   <Link key={c.id} className="catcard" href={`/products/${c.slug}`}>
-                    <div className={`sw ${content.swatchClass}`}></div>
+                    {thumbByCategory.get(c.id) ? (
+                      // eslint-disable-next-line @next/next/no-img-element
+                      <img
+                        src={thumbByCategory.get(c.id)}
+                        alt={c.name}
+                        className="sw"
+                        style={{ width: "100%", objectFit: "cover" }}
+                      />
+                    ) : (
+                      <div className={`sw ${content.swatchClass}`}></div>
+                    )}
                     <div className="body">
                       <div className="n">{String(i + 1).padStart(2, "0")}</div>
                       <h3>{c.name}</h3>

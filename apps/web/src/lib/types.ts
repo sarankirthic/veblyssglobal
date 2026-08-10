@@ -9,6 +9,10 @@ export interface Category {
   description: string | null;
   originRegion: string | null;
   displayOrder: number;
+  heroHeadline: string | null;
+  whyChoose: string[];
+  guarantee: string | null;
+  idealFor: string[];
 }
 
 export interface ProductSpecRow {
@@ -20,6 +24,7 @@ export interface Product {
   id: string;
   categoryId: string;
   category: string | null;
+  categorySlug: string | null;
   name: string;
   slug: string;
   shortDescription: string | null;
@@ -35,6 +40,10 @@ export interface Product {
   featured: boolean;
   isPublished: boolean;
   showInGallery: boolean;
+  heroHeadline: string | null;
+  whyChoose: string[];
+  guarantee: string | null;
+  idealFor: string[];
 }
 
 export interface GalleryImage {
@@ -60,12 +69,19 @@ export interface PageMeta {
   total: number;
 }
 
+export interface OfficeLocation {
+  id: string;
+  city: string;
+  companyName: string;
+  address: string;
+  phone?: string;
+}
+
 export interface ContactDetails {
   email?: string;
   phone?: string;
   whatsapp?: string;
-  bengaluruAddress?: string;
-  londonAddress?: string;
+  locations?: OfficeLocation[];
 }
 
 export interface Differentiator {

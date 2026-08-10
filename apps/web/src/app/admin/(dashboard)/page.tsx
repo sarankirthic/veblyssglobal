@@ -20,14 +20,16 @@ export default function DashboardPage() {
 
   return (
     <div>
-      <div className="mb-6 flex items-center justify-between">
-        <h1 className="text-2xl">Dashboard</h1>
-        <div className="flex gap-1 border border-adm-hairline bg-white p-1">
+      <div className="mb-8 flex items-center justify-between">
+        <h1 className="text-[28px] tracking-tight">Dashboard</h1>
+        <div className="flex gap-1 rounded-full bg-white p-1 shadow-adm-sm">
           {RANGES.map((d) => (
             <button
               key={d}
               onClick={() => setDays(d)}
-              className={`px-3 py-1.5 text-xs ${days === d ? "bg-adm-navy text-white" : "text-adm-muted"}`}
+              className={`rounded-full px-3.5 py-1.5 text-xs transition-colors ${
+                days === d ? "bg-adm-primary text-white" : "text-adm-muted hover:text-adm-ink"
+              }`}
             >
               {d}d
             </button>
@@ -38,15 +40,15 @@ export default function DashboardPage() {
       {funnelLoading || !funnel ? (
         <p className="text-sm text-adm-muted">Loading…</p>
       ) : (
-        <div className="mb-6 grid grid-cols-3 gap-4">
+        <div className="mb-8 grid grid-cols-1 gap-5 sm:grid-cols-3">
           <StatTile label="Pageviews" value={funnel.pageviews} hint={`Last ${days} days`} />
           <StatTile label="Product Views" value={funnel.productViews} hint={`Last ${days} days`} />
           <StatTile label="Enquiries" value={funnel.enquiries} hint={`Last ${days} days`} />
         </div>
       )}
 
-      <div className="mb-6 border border-adm-hairline bg-white p-6">
-        <h3 className="mb-4 text-lg">Traffic</h3>
+      <div className="mb-8 rounded-adm-lg bg-white p-7 shadow-adm-sm">
+        <h3 className="mb-5 text-lg">Traffic</h3>
         {trafficLoading || !traffic ? (
           <p className="text-sm text-adm-muted">Loading…</p>
         ) : (
@@ -54,9 +56,9 @@ export default function DashboardPage() {
         )}
       </div>
 
-      <div className="mb-6 grid grid-cols-2 gap-6">
-        <div className="border border-adm-hairline bg-white p-6">
-          <h3 className="mb-4 text-lg">Top Products</h3>
+      <div className="mb-8 grid grid-cols-1 gap-6 lg:grid-cols-2">
+        <div className="rounded-adm-lg bg-white p-7 shadow-adm-sm">
+          <h3 className="mb-5 text-lg">Top Products</h3>
           {productsLoading || !products ? (
             <p className="text-sm text-adm-muted">Loading…</p>
           ) : (
@@ -65,8 +67,8 @@ export default function DashboardPage() {
             />
           )}
         </div>
-        <div className="border border-adm-hairline bg-white p-6">
-          <h3 className="mb-4 text-lg">Geography</h3>
+        <div className="rounded-adm-lg bg-white p-7 shadow-adm-sm">
+          <h3 className="mb-5 text-lg">Geography</h3>
           {geoLoading || !geo ? (
             <p className="text-sm text-adm-muted">Loading…</p>
           ) : (
@@ -89,8 +91,8 @@ function ActivityLogPanel() {
   const { data, isLoading } = useActivityLog(page);
 
   return (
-    <div className="border border-adm-hairline bg-white p-6">
-      <h3 className="mb-4 text-lg">Activity Log</h3>
+    <div className="rounded-adm-lg bg-white p-7 shadow-adm-sm">
+      <h3 className="mb-5 text-lg">Activity Log</h3>
       {isLoading || !data ? (
         <p className="text-sm text-adm-muted">Loading…</p>
       ) : data.data.length === 0 ? (
@@ -123,14 +125,14 @@ function ActivityLogPanel() {
             <button
               onClick={() => setPage((p) => Math.max(1, p - 1))}
               disabled={page <= 1}
-              className="font-mono text-xs text-adm-muted hover:text-adm-navy disabled:opacity-30"
+              className="font-mono text-xs text-adm-muted hover:text-adm-primary disabled:opacity-30"
             >
               ← Prev
             </button>
             <button
               onClick={() => setPage((p) => p + 1)}
               disabled={data.data.length < 20}
-              className="font-mono text-xs text-adm-muted hover:text-adm-navy disabled:opacity-30"
+              className="font-mono text-xs text-adm-muted hover:text-adm-primary disabled:opacity-30"
             >
               Next →
             </button>

@@ -29,8 +29,8 @@ export default function GalleryPage() {
 
   return (
     <div>
-      <div className="mb-6 flex items-center justify-between">
-        <h1 className="text-2xl">Gallery</h1>
+      <div className="mb-8 flex items-center justify-between">
+        <h1 className="text-[28px] tracking-tight">Gallery</h1>
         <RoleGate allow={["admin", "editor"]}>
           <Button size="sm" onClick={() => setCreating(true)}>
             <Plus size={14} /> Add Album
@@ -53,16 +53,16 @@ export default function GalleryPage() {
       {!albums || albums.length === 0 ? (
         <EmptyState title="No albums yet" description="Create the first album to start uploading photos." />
       ) : (
-        <div className="grid grid-cols-[240px_1fr] gap-6">
-          <div className="flex flex-col gap-1">
+        <div className="grid grid-cols-1 gap-6 lg:grid-cols-[240px_1fr]">
+          <div className="flex flex-col gap-1.5">
             {albums.map((a) => (
               <button
                 key={a.id}
                 onClick={() => setSelected(a.id)}
-                className={`flex items-center justify-between border px-3 py-2.5 text-left text-sm ${
+                className={`flex items-center justify-between rounded-adm-sm px-3.5 py-2.5 text-left text-sm transition-shadow ${
                   selected === a.id
-                    ? "border-adm-navy bg-white"
-                    : "border-adm-hairline bg-white text-adm-muted hover:border-adm-navy"
+                    ? "bg-white shadow-adm-sm ring-1 ring-adm-primary/15"
+                    : "bg-white text-adm-muted shadow-adm-sm hover:text-adm-ink"
                 }`}
               >
                 <span>{a.name}</span>
@@ -114,7 +114,7 @@ function AlbumDetail({
 
   return (
     <div>
-      <div className="mb-4 flex items-center justify-between border border-adm-hairline bg-white px-4 py-3">
+      <div className="mb-5 flex items-center justify-between rounded-adm-lg bg-white px-5 py-4 shadow-adm-sm">
         <div>
           <div className="font-medium">{album.name}</div>
           <div className="font-mono text-xs text-adm-muted">{album.slug}</div>
@@ -135,9 +135,9 @@ function AlbumDetail({
       {images.length === 0 ? (
         <EmptyState title="No images yet" description="Upload the first image to this album." />
       ) : (
-        <div className="mb-4 grid grid-cols-4 gap-3">
+        <div className="mb-5 grid grid-cols-2 gap-3.5 sm:grid-cols-3 lg:grid-cols-4">
           {images.map((img, i) => (
-            <div key={img.id} className="border border-adm-hairline bg-white">
+            <div key={img.id} className="overflow-hidden rounded-adm-sm bg-white shadow-adm-sm">
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img src={img.url} alt={img.altText ?? ""} className="h-32 w-full object-cover" />
               <div className="flex items-center justify-between px-2 py-1.5">
@@ -146,7 +146,7 @@ function AlbumDetail({
                     type="button"
                     onClick={() => move(i, -1)}
                     disabled={i === 0}
-                    className="text-adm-muted hover:text-adm-navy disabled:opacity-30"
+                    className="text-adm-muted hover:text-adm-primary disabled:opacity-30"
                   >
                     <ArrowUp size={13} />
                   </button>
@@ -154,7 +154,7 @@ function AlbumDetail({
                     type="button"
                     onClick={() => move(i, 1)}
                     disabled={i === images.length - 1}
-                    className="text-adm-muted hover:text-adm-navy disabled:opacity-30"
+                    className="text-adm-muted hover:text-adm-primary disabled:opacity-30"
                   >
                     <ArrowDown size={13} />
                   </button>

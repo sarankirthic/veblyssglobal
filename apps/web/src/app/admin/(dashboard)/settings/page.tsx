@@ -17,7 +17,7 @@ export default function SettingsPage() {
 
   return (
     <div>
-      <h1 className="mb-6 text-2xl">Settings</h1>
+      <h1 className="mb-8 text-[28px] tracking-tight">Settings</h1>
 
       {!canEdit ? (
         <div className="mb-6">
@@ -33,12 +33,12 @@ export default function SettingsPage() {
         </div>
       ) : (
         <div className="flex flex-col gap-6">
-          <div className="border border-adm-hairline bg-white p-6">
+          <div className="rounded-adm-lg bg-white p-7 shadow-adm-sm">
             <h3 className="mb-2 text-lg">Contact Details</h3>
             <p className="text-sm">{settings.contact_details?.email ?? "—"}</p>
             <p className="text-sm">{settings.contact_details?.phone ?? "—"}</p>
           </div>
-          <div className="border border-adm-hairline bg-white p-6">
+          <div className="rounded-adm-lg bg-white p-7 shadow-adm-sm">
             <h3 className="mb-2 text-lg">What Makes Us Different</h3>
             <ul className="list-disc pl-5 text-sm">
               {(settings.differentiators ?? []).map((d) => (

@@ -14,9 +14,9 @@ export function HorizontalBarList({
       {rows.map((r) => (
         <div key={r.label} className="flex items-center gap-3">
           <div className="w-24 shrink-0 truncate font-mono text-xs text-adm-muted">{r.label}</div>
-          <div className="h-3 flex-1 bg-adm-neutral-light">
+          <div className="h-2.5 flex-1 rounded-full bg-adm-neutral-light">
             <div
-              className="h-3 rounded-r bg-adm-navy"
+              className="h-2.5 rounded-full bg-adm-primary"
               style={{ width: `${Math.max(4, (r.value / max) * 100)}%` }}
               title={`${r.label}: ${r.value}`}
             />

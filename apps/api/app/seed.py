@@ -194,6 +194,22 @@ SETTINGS = {
         "email": "info@veblyssglobal.com",
         "phone": "+91 80 2658 2427 / +91 98448 44225",
         "whatsapp": "+44 7722 184477",
+        "locations": [
+            {
+                "id": "bengaluru",
+                "city": "Bengaluru",
+                "companyName": "VeBlyss Global Pvt Ltd",
+                "address": "2619, 36th A Cross, 26th Main\n4th T Block, 9th Block Post, Jayanagar\nBengaluru, Karnataka - 560041",
+                "phone": "+91 80 2658 2427 / +91 98448 44225",
+            },
+            {
+                "id": "london",
+                "city": "London",
+                "companyName": "VeBlyss Limited",
+                "address": "71–75 Shelton Street\nCovent Garden\nLondon, WC2H 9JQ, United Kingdom",
+                "phone": "+44 7722 184477",
+            },
+        ],
     },
     "social_links": {
         "linkedin": "",

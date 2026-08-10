@@ -23,8 +23,19 @@ const schema = z.object({
   description: z.string().optional(),
   originRegion: z.string().optional(),
   displayOrder: z.coerce.number().int().min(0),
+  heroHeadline: z.string().max(200).optional(),
+  whyChoose: z.string().optional(),
+  guarantee: z.string().max(500).optional(),
+  idealFor: z.string().optional(),
 });
 type FormValues = z.infer<typeof schema>;
+
+function splitLines(value?: string): string[] {
+  return (value ?? "")
+    .split("\n")
+    .map((line) => line.trim())
+    .filter(Boolean);
+}
 
 export function CategoryForm({
   initial,
@@ -48,6 +59,10 @@ export function CategoryForm({
       description: initial?.description ?? "",
       originRegion: initial?.originRegion ?? "",
       displayOrder: initial?.displayOrder ?? 0,
+      heroHeadline: initial?.heroHeadline ?? "",
+      whyChoose: (initial?.whyChoose ?? []).join("\n"),
+      guarantee: initial?.guarantee ?? "",
+      idealFor: (initial?.idealFor ?? []).join("\n"),
     },
   });
 
@@ -58,6 +73,10 @@ export function CategoryForm({
         ...values,
         description: values.description || null,
         originRegion: values.originRegion || null,
+        heroHeadline: values.heroHeadline || null,
+        whyChoose: splitLines(values.whyChoose),
+        guarantee: values.guarantee || null,
+        idealFor: splitLines(values.idealFor),
       });
     } catch (err) {
       setServerError(err instanceof ApiRequestError ? err.message : "Something went wrong.");
@@ -65,7 +84,7 @@ export function CategoryForm({
   });
 
   return (
-    <form onSubmit={submit} className="border border-adm-hairline bg-white p-6">
+    <form onSubmit={submit} className="rounded-adm-lg bg-white p-7 shadow-adm-sm">
       <h3 className="mb-4 text-lg">{initial ? "Edit Category" : "New Category"}</h3>
       {serverError ? (
         <div className="mb-4">
@@ -91,6 +110,21 @@ export function CategoryForm({
           <Input type="number" {...register("displayOrder")} />
         </Field>
       </div>
+
+      <h3 className="mb-4 mt-6 text-lg pt-2">Category Page Content</h3>
+      <Field label="Hero Headline" error={errors.heroHeadline?.message}>
+        <Input {...register("heroHeadline")} placeholder="Falls back to built-in copy if left blank" />
+      </Field>
+      <Field label="Why Choose (one per line)" error={errors.whyChoose?.message}>
+        <Textarea {...register("whyChoose")} rows={4} placeholder="Falls back to built-in copy if left blank" />
+      </Field>
+      <Field label="Guarantee" error={errors.guarantee?.message}>
+        <Textarea {...register("guarantee")} placeholder="Falls back to built-in copy if left blank" />
+      </Field>
+      <Field label="Ideal For (one per line)" error={errors.idealFor?.message}>
+        <Textarea {...register("idealFor")} rows={3} placeholder="Falls back to built-in copy if left blank" />
+      </Field>
+
       <div className="mt-4 flex gap-2">
         <Button type="submit" disabled={isSubmitting}>
           {isSubmitting ? "Saving…" : "Save"}

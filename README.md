@@ -41,10 +41,18 @@ one deploy. See `CONTRIBUTING.md` for the rationale.
 ## Features
 
 **Storefront**
-- Home, About, Products (6 category pages), Gallery, Blog, FAQ, and Contact — all server-rendered
+- Home, About, Products (6 category pages), Gallery, Certifications, FAQ, Our Promise, and Contact — all server-rendered
 - Product category pages with per-category "why choose" copy, spec sheets, and material guarantees
+- Gallery combines manually-curated albums (admin-managed) with per-product photos — any product can opt in via a "Show in Gallery" toggle instead of re-uploading the same image
+- Certifications page lists all 16 real certifications/registrations behind the business
 - Working contact form (validated client + server side, submits straight to the API)
 - Content pulled live from the API — categories, products, and site settings aren't hardcoded
+- No Blog — an earlier pass had one with fabricated placeholder posts and no real backend; deleted rather than shipped. "Shop by Occasion" is built but currently unlinked from nav (paused, not deleted) — see `FUTURE.md`
+
+**Admin panel** (`/admin/*`, inside `apps/web`)
+- Products, categories, gallery albums, contact submissions, site settings (contact details with an add/remove office-locations list, differentiators, social links), and a metrics dashboard
+- Role-gated UI (`admin` / `editor` / `viewer`) matching the API's RBAC
+- `flask create-admin --email ... --name ... --password ...` creates or resets an admin user — no more manual `flask shell` (see `apps/api/README.md`)
 
 **API**
 - Modular REST surface: `auth`, `products` (categories + products), `gallery`, `media`, `contact`, `metrics`, `settings`
@@ -132,7 +140,7 @@ usual host port (`:5432`, `:6379`, `:4000`, `:3000`). `docker-compose.yaml` alon
 ## Testing
 
 ```bash
-cd apps/api && pytest -q     # 13 tests — auth, RBAC, products, contact, settings
+cd apps/api && pytest -q     # 17 tests — auth, RBAC, products, contact, settings
 pnpm --filter @veblyss/web build   # type-checks + builds the storefront
 pnpm --filter @veblyss/web lint    # ESLint
 ```
@@ -188,6 +196,9 @@ Before an actual production launch, work through [`PRODUCTION_CHECKLIST.md`](PRO
 
 ## Known gaps
 
-Tracked in [`TODO.md`](TODO.md) — mostly real business facts still needed (pricing, delivery
-windows, return policy, payment methods) that are currently honest placeholders in the copy
-rather than fabricated numbers.
+- [`TODO.md`](TODO.md) — real business facts still needed (pricing, delivery windows, return
+  policy, payment methods) that are currently honest placeholders in the copy rather than
+  fabricated numbers.
+- [`FUTURE.md`](FUTURE.md) — features that are built (or partly built) but deliberately not
+  live right now: Shop by Occasion (paused), a real per-product detail page, the Industries
+  page, and a couple of others. Check it before rebuilding something that already exists.

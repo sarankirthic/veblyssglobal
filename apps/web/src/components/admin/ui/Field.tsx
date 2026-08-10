@@ -8,8 +8,8 @@ export function Field({
   children: React.ReactNode;
 }) {
   return (
-    <label className="mb-3 block">
-      <span className="mb-1.5 block font-mono text-[11px] uppercase tracking-wider text-adm-muted">
+    <label className="mb-4 block">
+      <span className="mb-2 block font-mono text-[11px] uppercase tracking-wider text-adm-muted">
         {label}
       </span>
       {children}

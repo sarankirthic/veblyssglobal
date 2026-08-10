@@ -27,7 +27,7 @@ export const CATEGORY_CONTENT: Record<string, CategoryContent> = {
   copperware: {
     heroHeadline: "Copperware Made to Earn a Place on Your Table",
     whyChoose: [
-      "FSSAI-cleared for direct food and beverage contact — safe for daily use, not just display",
+      "Food-grade 99.9% copper — safe for daily food and beverage use, not just display",
       "Hand-hammered using techniques passed down through generations",
       "Develops a natural patina with use — no two pieces age quite the same",
       "A gift that becomes part of someone's daily ritual, not a drawer decoration",

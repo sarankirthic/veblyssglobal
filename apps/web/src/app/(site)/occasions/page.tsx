@@ -27,7 +27,7 @@ const OCCASIONS = [
     n: "03",
     title: "For Gifting",
     body: "A piece with a story tends to matter more than a piece with a price tag — explore what to give, and who it's for.",
-    links: [{ label: "Gift ideas →", href: "/blog" }],
+    links: [{ label: "Shop gifts →", href: "/products" }],
   },
   {
     n: "04",

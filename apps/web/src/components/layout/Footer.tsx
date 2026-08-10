@@ -4,19 +4,28 @@ import { getSettings } from "@/lib/data";
 export async function Footer() {
   const settings = await getSettings();
   const contact = settings.contact_details ?? {};
+  const locations = contact.locations ?? [];
 
   return (
     <footer>
-      <div className="wrap foot-grid">
+      <div
+        className="wrap foot-grid"
+        style={locations.length !== 2 ? { gridTemplateColumns: `1.2fr 0.8fr repeat(${Math.max(1, locations.length)}, 1fr)` } : undefined}
+      >
         <div>
           <Link href="/" className="wordmark" style={{ fontSize: 17 }}>
             Ve<b>B</b>lyss
           </Link>
           <p>Authentic Indian craftsmanship, handmade for modern homes.</p>
           <div className="foot-social">
-            <span>LINKEDIN</span>
-            <span>FACEBOOK</span>
-            <span>INSTAGRAM</span>
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src="/icons/linkedin.svg" alt="LinkedIn" width={25} height={25} />
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src="/icons/facebook.svg" alt="Facebook" width={25} height={25} />
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src="/icons/instagram.svg" alt="Instagram" width={25} height={25} />
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src="/icons/whatsapp.svg" alt="WhatsApp" width={25} height={25} />
           </div>
         </div>
 
@@ -26,48 +35,34 @@ export async function Footer() {
             <Link href="/about">About</Link>
             <Link href="/products">Products</Link>
             <Link href="/gallery">Gallery</Link>
-            <Link href="/occasions">Shop by Occasion</Link>
-            <Link href="/blog">Blog</Link>
+            <Link href="/certifications">Certifications</Link>
             <Link href="/faq">FAQ</Link>
             <Link href="/contact">Contact</Link>
           </div>
         </div>
 
-        <div>
-          <div className="foot-col-title">Bengaluru studio</div>
-          <p className="foot-addr">
-            VeBlyss Global Pvt Ltd
-            <br />
-            2619, 36th A Cross, 26th Main
-            <br />
-            4th T Block, Jayanagar
-            <br />
-            Bengaluru, KA 560041
-            <br />
-            {contact.phone ?? "+91 80 2658 2427"}
-          </p>
-        </div>
-
-        <div>
-          <div className="foot-col-title">London studio</div>
-          <p className="foot-addr">
-            VeBlyss Limited
-            <br />
-            71–75 Shelton Street
-            <br />
-            Covent Garden
-            <br />
-            London WC2H 9JQ
-            <br />
-            {contact.whatsapp ?? "+44 7722 184477"}
-          </p>
-          <div className="foot-download">
-            <Link href="/contact#lookbook" style={{ color: "inherit" }}>
-              Browse Our Lookbook
-            </Link>
+        {locations.map((loc) => (
+          <div key={loc.id}>
+            <div className="foot-col-title">{loc.city} office</div>
+            <p className="foot-addr">
+              {loc.companyName}
+              {loc.address.split("\n").map((line, i) => (
+                <span key={i}>
+                  <br />
+                  {line}
+                </span>
+              ))}
+              <br />
+              {loc.phone ?? contact.phone ?? ""}
+            </p>
           </div>
-        </div>
+        ))}
       </div>
+      {/*<div className="wrap foot-download">*/}
+      {/*  <Link href="/contact#lookbook" style={{ color: "inherit" }}>*/}
+      {/*    Browse Our Lookbook*/}
+      {/*  </Link>*/}
+      {/*</div>*/}
 
       <div className="wrap foot-bottom">
         <span>© {new Date().getFullYear()} VeBlyss Global</span>

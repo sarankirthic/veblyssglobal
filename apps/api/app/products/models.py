@@ -14,6 +14,10 @@ class Category(db.Model, TimestampMixin):
     description = db.Column(db.Text, nullable=True)
     origin_region = db.Column(db.String(120), nullable=True)
     display_order = db.Column(db.Integer, nullable=False, default=0)
+    hero_headline = db.Column(db.String(200), nullable=True)
+    why_choose = db.Column(JsonType, nullable=False, default=list)
+    guarantee = db.Column(db.Text, nullable=True)
+    ideal_for = db.Column(JsonType, nullable=False, default=list)
     products = db.relationship("Product", back_populates="category", lazy="selectin")
 
     def to_dict(self) -> dict:
@@ -24,6 +28,10 @@ class Category(db.Model, TimestampMixin):
             "description": self.description,
             "originRegion": self.origin_region,
             "displayOrder": self.display_order,
+            "heroHeadline": self.hero_headline,
+            "whyChoose": self.why_choose or [],
+            "guarantee": self.guarantee,
+            "idealFor": self.ideal_for or [],
         }
 
 
@@ -46,6 +54,10 @@ class Product(db.Model, TimestampMixin):
     featured = db.Column(db.Boolean, nullable=False, default=False)
     is_published = db.Column(db.Boolean, nullable=False, default=True)
     show_in_gallery = db.Column(db.Boolean, nullable=False, default=False)
+    hero_headline = db.Column(db.String(200), nullable=True)
+    why_choose = db.Column(JsonType, nullable=False, default=list)
+    guarantee = db.Column(db.Text, nullable=True)
+    ideal_for = db.Column(JsonType, nullable=False, default=list)
     category = db.relationship("Category", back_populates="products")
 
     def to_dict(self) -> dict:
@@ -53,6 +65,7 @@ class Product(db.Model, TimestampMixin):
             "id": self.id,
             "categoryId": self.category_id,
             "category": self.category.name if self.category else None,
+            "categorySlug": self.category.slug if self.category else None,
             "name": self.name,
             "slug": self.slug,
             "shortDescription": self.short_description,
@@ -68,4 +81,8 @@ class Product(db.Model, TimestampMixin):
             "featured": self.featured,
             "isPublished": self.is_published,
             "showInGallery": self.show_in_gallery,
+            "heroHeadline": self.hero_headline,
+            "whyChoose": self.why_choose or [],
+            "guarantee": self.guarantee,
+            "idealFor": self.ideal_for or [],
         }

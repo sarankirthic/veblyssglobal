@@ -42,20 +42,20 @@ export function ImageUploader({
     <div>
       <div className="flex flex-wrap gap-2">
         {images.map((url) => (
-          <div key={url} className="relative h-20 w-20 border border-adm-hairline">
+          <div key={url} className="relative h-20 w-20 overflow-hidden rounded-adm-sm shadow-adm-sm">
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img src={url} alt="" className="h-full w-full object-cover" />
             <button
               type="button"
               onClick={() => onChange(images.filter((u) => u !== url))}
-              className="absolute -right-2 -top-2 flex h-5 w-5 items-center justify-center bg-adm-danger text-white"
+              className="absolute -right-1.5 -top-1.5 flex h-5 w-5 items-center justify-center rounded-full bg-adm-danger text-white shadow-adm-sm"
               aria-label="Remove image"
             >
               <X size={12} />
             </button>
           </div>
         ))}
-        <label className="flex h-20 w-20 cursor-pointer flex-col items-center justify-center gap-1 border border-dashed border-adm-hairline text-adm-muted hover:border-adm-navy hover:text-adm-navy">
+        <label className="flex h-20 w-20 cursor-pointer flex-col items-center justify-center gap-1 rounded-adm-sm border border-dashed border-adm-hairline text-adm-muted transition-colors hover:border-adm-primary hover:text-adm-primary">
           <Upload size={16} />
           <span className="text-[10px]">{uploading ? "…" : "Add"}</span>
           <input

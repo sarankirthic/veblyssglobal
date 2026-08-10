@@ -4,6 +4,7 @@ design/.vercel
 .DS_Store
 .logs/
 .pnpm_hash
+.lean-ctx
 
 # apps/api (Flask)
 apps/api/.venv/
@@ -24,3 +25,6 @@ apps/web/.env.local
 docs/
 CLAUDE.md
 TODO.md
+.superpowers/
+assets/
+redesign/

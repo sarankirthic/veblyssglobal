@@ -40,6 +40,10 @@ def create_category(body: CategoryBody):
         description=body.description,
         origin_region=body.originRegion,
         display_order=body.displayOrder,
+        hero_headline=body.heroHeadline,
+        why_choose=body.whyChoose,
+        guarantee=body.guarantee,
+        ideal_for=body.idealFor,
     )
     db.session.add(cat)
     try:
@@ -62,6 +66,10 @@ def update_category(path: CategoryPath, body: CategoryBody):
     cat.description = body.description
     cat.origin_region = body.originRegion
     cat.display_order = body.displayOrder
+    cat.hero_headline = body.heroHeadline
+    cat.why_choose = body.whyChoose
+    cat.guarantee = body.guarantee
+    cat.ideal_for = body.idealFor
     try:
         db.session.commit()
     except IntegrityError:
@@ -94,6 +102,8 @@ def list_products(query: ProductQuery):
         q = q.filter_by(is_published=True)
     if query.category:
         q = q.join(Category).filter(Category.slug == query.category)
+    if query.slug:
+        q = q.filter_by(slug=query.slug)
     if query.featured is not None:
         q = q.filter_by(featured=query.featured)
     if query.show_in_gallery is not None:
@@ -143,6 +153,10 @@ def create_product(body: ProductBody):
         featured=body.featured,
         is_published=body.isPublished,
         show_in_gallery=body.showInGallery,
+        hero_headline=body.heroHeadline,
+        why_choose=body.whyChoose,
+        guarantee=body.guarantee,
+        ideal_for=body.idealFor,
     )
     db.session.add(product)
     try:
@@ -178,6 +192,10 @@ def update_product(path: ProductPath, body: ProductBody):
     product.featured = body.featured
     product.is_published = body.isPublished
     product.show_in_gallery = body.showInGallery
+    product.hero_headline = body.heroHeadline
+    product.why_choose = body.whyChoose
+    product.guarantee = body.guarantee
+    product.ideal_for = body.idealFor
     try:
         db.session.commit()
     except IntegrityError:

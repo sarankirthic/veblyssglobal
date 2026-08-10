@@ -36,8 +36,19 @@ const schema = z.object({
   featured: z.boolean(),
   isPublished: z.boolean(),
   showInGallery: z.boolean(),
+  heroHeadline: z.string().max(200).optional(),
+  whyChoose: z.string().optional(),
+  guarantee: z.string().max(500).optional(),
+  idealFor: z.string().optional(),
 });
 type FormValues = z.infer<typeof schema>;
+
+function splitLines(value?: string): string[] {
+  return (value ?? "")
+    .split("\n")
+    .map((line) => line.trim())
+    .filter(Boolean);
+}
 
 export function ProductForm({
   initial,
@@ -75,6 +86,10 @@ export function ProductForm({
       featured: initial?.featured ?? false,
       isPublished: initial?.isPublished ?? true,
       showInGallery: initial?.showInGallery ?? false,
+      heroHeadline: initial?.heroHeadline ?? "",
+      whyChoose: (initial?.whyChoose ?? []).join("\n"),
+      guarantee: initial?.guarantee ?? "",
+      idealFor: (initial?.idealFor ?? []).join("\n"),
     },
   });
   const specFields = useFieldArray({ control, name: "specs" });
@@ -93,6 +108,10 @@ export function ProductForm({
         leadTime: values.leadTime || null,
         priceRange: values.priceRange || null,
         images,
+        heroHeadline: values.heroHeadline || null,
+        whyChoose: splitLines(values.whyChoose),
+        guarantee: values.guarantee || null,
+        idealFor: splitLines(values.idealFor),
       });
     } catch (err) {
       setServerError(err instanceof ApiRequestError ? err.message : "Something went wrong.");
@@ -100,7 +119,7 @@ export function ProductForm({
   });
 
   return (
-    <form onSubmit={submit} className="border border-adm-hairline bg-white p-6">
+    <form onSubmit={submit} className="rounded-adm-lg bg-white p-7 shadow-adm-sm">
       <h3 className="mb-4 text-lg">{initial ? "Edit Product" : "New Product"}</h3>
       {serverError ? (
         <div className="mb-4">
@@ -179,6 +198,20 @@ export function ProductForm({
 
       <Field label="Images">
         <ImageUploader images={images} onChange={setImages} folder="products" />
+      </Field>
+
+      <h3 className="mb-4 mt-6 text-lg">Product Page Content</h3>
+      <Field label="Hero Headline" error={errors.heroHeadline?.message}>
+        <Input {...register("heroHeadline")} placeholder="Falls back to category headline if left blank" />
+      </Field>
+      <Field label="Why Choose (one per line)" error={errors.whyChoose?.message}>
+        <Textarea {...register("whyChoose")} rows={4} placeholder="Falls back to category bullets if left blank" />
+      </Field>
+      <Field label="Guarantee" error={errors.guarantee?.message}>
+        <Textarea {...register("guarantee")} placeholder="Falls back to category guarantee if left blank" />
+      </Field>
+      <Field label="Ideal For (one per line)" error={errors.idealFor?.message}>
+        <Textarea {...register("idealFor")} rows={3} placeholder="Falls back to category tags if left blank" />
       </Field>
 
       <div className="mt-4 flex gap-6">

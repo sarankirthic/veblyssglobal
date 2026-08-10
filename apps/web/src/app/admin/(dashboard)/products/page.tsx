@@ -29,15 +29,15 @@ export default function ProductsPage() {
 
   return (
     <div>
-      <div className="mb-6 flex items-center justify-between">
-        <h1 className="text-2xl">Products</h1>
-        <div className="flex gap-1 border border-adm-hairline bg-white p-1">
+      <div className="mb-8 flex items-center justify-between">
+        <h1 className="text-[28px] tracking-tight">Products</h1>
+        <div className="flex gap-1 rounded-full bg-white p-1 shadow-adm-sm">
           {(["categories", "products"] as const).map((t) => (
             <button
               key={t}
               onClick={() => setTab(t)}
-              className={`px-4 py-1.5 text-sm capitalize ${
-                tab === t ? "bg-adm-navy text-white" : "text-adm-muted"
+              className={`rounded-full px-4 py-1.5 text-sm capitalize transition-colors ${
+                tab === t ? "bg-adm-primary text-white" : "text-adm-muted hover:text-adm-ink"
               }`}
             >
               {t}

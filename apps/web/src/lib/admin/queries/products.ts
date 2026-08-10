@@ -18,6 +18,10 @@ export type CategoryInput = {
   description?: string | null;
   originRegion?: string | null;
   displayOrder: number;
+  heroHeadline?: string | null;
+  whyChoose: string[];
+  guarantee?: string | null;
+  idealFor: string[];
 };
 
 export function useCreateCategory() {
@@ -79,6 +83,10 @@ export type ProductInput = {
   featured: boolean;
   isPublished: boolean;
   showInGallery: boolean;
+  heroHeadline?: string | null;
+  whyChoose: string[];
+  guarantee?: string | null;
+  idealFor: string[];
 };
 
 export function useCreateProduct() {

@@ -43,11 +43,11 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-adm-navy px-4">
-      <div className="w-full max-w-sm border border-adm-hairline bg-white p-8">
-        <div className="mb-6">
-          <div className="font-mono text-[11px] uppercase tracking-wider text-adm-muted">VeBlyss</div>
-          <h1 className="mt-1 text-2xl">Admin Login</h1>
+    <div className="flex min-h-screen items-center justify-center bg-adm-nav px-4">
+      <div className="w-full max-w-sm rounded-adm-lg bg-white p-9 shadow-adm-md">
+        <div className="mb-7">
+          <div className="font-mono text-[11px] uppercase tracking-wider text-adm-gold">VeBlyss</div>
+          <h1 className="mt-1.5 text-[26px] tracking-tight">Admin Login</h1>
         </div>
 
         {serverError ? (

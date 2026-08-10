@@ -49,7 +49,7 @@ export function AlbumForm({
   });
 
   return (
-    <form onSubmit={submit} className="border border-adm-hairline bg-white p-6">
+    <form onSubmit={submit} className="rounded-adm-lg bg-white p-7 shadow-adm-sm">
       <h3 className="mb-4 text-lg">New Album</h3>
       {serverError ? (
         <div className="mb-4">

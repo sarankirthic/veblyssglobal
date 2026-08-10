@@ -20,8 +20,8 @@ export default function ContactPage() {
 
   return (
     <div>
-      <div className="mb-6 flex items-center justify-between">
-        <h1 className="text-2xl">Enquiries</h1>
+      <div className="mb-8 flex items-center justify-between">
+        <h1 className="text-[28px] tracking-tight">Enquiries</h1>
         <span className="font-mono text-xs text-adm-muted">{meta.total} total</span>
       </div>
 
@@ -48,7 +48,7 @@ export default function ContactPage() {
                       <button
                         type="button"
                         onClick={() => setExpanded(expanded === s.id ? null : s.id)}
-                        className="text-adm-muted hover:text-adm-navy"
+                        className="text-adm-muted hover:text-adm-primary"
                       >
                         {expanded === s.id ? <ChevronDown size={14} /> : <ChevronRight size={14} />}
                       </button>

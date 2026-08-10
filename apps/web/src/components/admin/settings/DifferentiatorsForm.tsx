@@ -32,7 +32,7 @@ export function DifferentiatorsForm({ initial }: { initial: Differentiator[] }) 
   });
 
   return (
-    <form onSubmit={submit} className="border border-adm-hairline bg-white p-6">
+    <form onSubmit={submit} className="rounded-adm-lg bg-white p-7 shadow-adm-sm">
       <h3 className="mb-1 text-lg">What Makes Us Different</h3>
       <p className="mb-4 text-xs text-adm-muted">
         Canonical list per docs/BRAND.md §4 — shown on Home and About.
@@ -50,7 +50,7 @@ export function DifferentiatorsForm({ initial }: { initial: Differentiator[] }) 
 
       <div className="flex flex-col gap-3">
         {fields.fields.map((f, i) => (
-          <div key={f.id} className="flex gap-2 border border-adm-hairline p-3">
+          <div key={f.id} className="flex gap-2 rounded-adm-sm bg-adm-neutral-light/60 p-3.5">
             <div className="flex-1">
               <Input placeholder="Title" className="mb-2" {...register(`items.${i}.title` as const)} />
               <Textarea placeholder="Description" {...register(`items.${i}.description` as const)} />

@@ -10,6 +10,7 @@ from app.common.logging import configure_logging
 from app.common.security_headers import register_security_headers
 from app.config import Config, TestConfig
 from app.extensions import db, limiter, migrate
+from app.auth.cli import register_create_admin_command
 from app.seed import register_seed_command
 
 
@@ -70,5 +71,6 @@ def create_app(config_class=None):
         app.register_api(bp)
 
     register_seed_command(app)
+    register_create_admin_command(app)
 
     return app

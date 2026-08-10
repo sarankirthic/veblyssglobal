@@ -5,34 +5,59 @@
    deployed site, not a redesign. Tailwind utilities are still available for
    anything new; existing markup keeps the original class vocabulary. */
 :root {
-  --bg: #fafafa;
+  /* Premium D2C palette (2026-08 redesign) — matched exactly to the
+     redesign/ mockup (Homepage Hero.dc.html, turn 2 "2a" — the canonical,
+     latest exploration; mockup.png is its screenshot). --border uses an
+     fg-tinted alpha rather than a flat hex, per the mockup's own technique. */
+  --bg: #f7f3ea;
   --surface: #ffffff;
-  --fg: #0a0a0a;
-  --muted: #737373;
-  --border: #ebebeb;
-  --accent: #792727;
+  --fg: #2d211b;
+  --muted: #5c4c40;
+  --faint: #7a6858;
+  --border: rgba(45, 33, 27, 0.14);
+  --accent: #c45b32;
+  --gold: #b58a45;
   --nav: #368581;
 
-  --font-head: var(--font-dm-serif-display), Georgia, serif;
-  --font-body: var(--font-dm-sans), system-ui, sans-serif;
+  --font-head: var(--font-marcellus), Georgia, serif;
+  --font-body: var(--font-karla), system-ui, sans-serif;
   --font-mono-stack: var(--font-dm-mono), ui-monospace, monospace;
 
-  /* Admin panel (/admin) tokens — Navy/Gold per docs/BRAND.md §8. Prefixed
-     adm- and scoped under .admin-app below so they never collide with the
-     public site's tokens above, which intentionally use a different palette
-     (see CONTRIBUTING.md — that divergence predates the admin panel and
-     isn't this file's problem to fix). */
-  --adm-navy: #12233f;
-  --adm-navy-support: #1b3a63;
-  --adm-gold: #b08d57;
+  /* Admin panel (/admin) tokens — now shares the storefront's brand tokens
+     (2026-08 admin redesign, matching redesign/veblyss-admin-prompt.md).
+     --adm-nav is the login screen's surface (teal) — kept as its own token
+     since the 2026-08 nav-hierarchy iteration deliberately gives the
+     sidebar a *different* color (--adm-sidebar, terracotta) than that.
+     --adm-primary is the primary-action color (terracotta). Kept the adm-
+     prefix + .admin-app scoping so these never leak into the public site's
+     own tokens above. */
+  --adm-nav: var(--nav);
+  --adm-sidebar: var(--accent);
+  --adm-sidebar-active: var(--nav);
+  /* Deliberately a hair off --adm-sidebar-active (#368581) — "subtle but
+     perceptible" difference between header and active-nav teals per the
+     nav-hierarchy iteration spec. */
+  --adm-header: #398b87;
+  --adm-primary: var(--accent);
+  --adm-primary-support: #a84726;
+  --adm-gold: var(--gold);
   --adm-neutral-light: #f2f2f0;
-  --adm-ink: #1a1a1a;
-  --adm-muted: #6b6e76;
-  --adm-hairline: #dcdcd8;
-  --adm-danger: #b3261e;
-  --adm-success: #2e7d32;
-  --adm-font-head: Cambria, Georgia, "Times New Roman", serif;
-  --adm-font-body: Calibri, "Segoe UI", system-ui, sans-serif;
+  --adm-ink: var(--fg);
+  --adm-muted: var(--muted);
+  --adm-hairline: rgba(45, 33, 27, 0.14);
+  --adm-danger: #a8402f;
+  --adm-warning: #a9752b;
+  --adm-success: #4f7a4a;
+  --adm-font-head: var(--font-head);
+  --adm-font-body: var(--font-body);
+
+  /* Elevation + radius scale — admin panel only. Panels/tables/cards use
+     shadow instead of a hard border to feel lighter; buttons/inputs/badges
+     use the smaller radius so they read as controls, not surfaces. */
+  --adm-radius-sm: 8px;
+  --adm-radius-lg: 16px;
+  --adm-shadow-sm: 0 1px 2px rgba(45, 33, 27, 0.06), 0 1px 1px rgba(45, 33, 27, 0.04);
+  --adm-shadow-md: 0 8px 24px rgba(45, 33, 27, 0.1);
 }
 
 @theme inline {
@@ -40,29 +65,39 @@
   --color-surface: var(--surface);
   --color-fg: var(--fg);
   --color-muted: var(--muted);
+  --color-faint: var(--faint);
   --color-border: var(--border);
   --color-accent: var(--accent);
+  --color-gold: var(--gold);
   --color-nav: var(--nav);
 
-  --font-head: var(--font-head);
-  --font-body: var(--font-body);
   --font-mono: var(--font-mono-stack);
 
-  --color-adm-navy: var(--adm-navy);
-  --color-adm-navy-support: var(--adm-navy-support);
+  --color-adm-nav: var(--adm-nav);
+  --color-adm-sidebar: var(--adm-sidebar);
+  --color-adm-sidebar-active: var(--adm-sidebar-active);
+  --color-adm-header: var(--adm-header);
+  --color-adm-primary: var(--adm-primary);
+  --color-adm-primary-support: var(--adm-primary-support);
   --color-adm-gold: var(--adm-gold);
   --color-adm-neutral-light: var(--adm-neutral-light);
   --color-adm-ink: var(--adm-ink);
   --color-adm-muted: var(--adm-muted);
   --color-adm-hairline: var(--adm-hairline);
   --color-adm-danger: var(--adm-danger);
+  --color-adm-warning: var(--adm-warning);
   --color-adm-success: var(--adm-success);
   --font-adm-head: var(--adm-font-head);
   --font-adm-body: var(--adm-font-body);
+  --radius-adm-sm: var(--adm-radius-sm);
+  --radius-adm-lg: var(--adm-radius-lg);
+  --shadow-adm-sm: var(--adm-shadow-sm);
+  --shadow-adm-md: var(--adm-shadow-md);
+  --font-sans: var(--font-sans);
 }
 
-/* Scope root for everything under /admin — swaps in the Navy/Gold palette
-   and Cambria/Calibri type without touching the public site's <body>. */
+/* Scope root for everything under /admin — shares the storefront's brand
+   tokens (via --adm-* aliases above) without touching the public <body>. */
 .admin-app {
   min-height: 100vh;
   font-family: var(--adm-font-body);
@@ -73,9 +108,23 @@
 .admin-app h2,
 .admin-app h3,
 .admin-app h4 {
-  font-family: var(--adm-font-head);
   font-weight: 400;
   margin: 0;
+  /* Public site has bare h1–h4 selectors (serif, fixed sizes) with no
+     .admin-app guard, and beat Tailwind's own text-* utilities in the
+     cascade (plain CSS outranks Tailwind's utility layer) — so every size
+     here must be set explicitly, referencing Tailwind's own scale tokens
+     to stay in sync with each component's text-lg/text-[28px] utility. */
+  font-family: var(--adm-font-body);
+  font-size: var(--text-lg);
+  line-height: var(--text-lg--line-height);
+}
+.admin-app h1 {
+  /* Serif is reserved for page-level titles ("Products", "Dashboard") —
+     card/section headers (h2/h3/h4) stay sans at the h3 size above. */
+  font-family: var(--adm-font-head);
+  font-size: 28px;
+  line-height: 1.2;
 }
 .admin-app table {
   border-collapse: collapse;
@@ -107,10 +156,20 @@ a {
   padding: 0 40px;
 }
 .eyebrow {
-  font: 400 12px/1 var(--font-mono-stack);
-  letter-spacing: 0.08em;
+  font: 500 12px/1 var(--font-mono-stack);
+  letter-spacing: 0.1em;
   text-transform: uppercase;
-  color: var(--muted);
+  color: var(--gold);
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+}
+.eyebrow::before {
+  content: "";
+  display: inline-block;
+  width: 22px;
+  height: 1px;
+  background: var(--gold);
 }
 .accent {
   color: var(--accent);
@@ -119,27 +178,44 @@ a {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  padding: 16px 30px;
-  font: 500 14px/1 var(--font-body);
-  letter-spacing: 0.02em;
+  padding: 15px 28px;
+  font: 500 13.5px/1 var(--font-body);
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+  border-radius: 999px;
   border: 1px solid transparent;
   cursor: pointer;
+  transition: background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease, transform 0.2s ease;
 }
 .btn-primary {
   background: var(--accent);
   color: #fff;
 }
+.btn-primary:hover {
+  background: #a84726;
+}
 .btn-outline {
-  border-color: var(--fg);
+  border-color: rgba(45, 33, 27, 0.35);
   color: var(--fg);
+  background: transparent;
+}
+.btn-outline:hover {
+  background: rgba(45, 33, 27, 0.06);
+  color: var(--fg);
+}
+.btn:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
 }
 .btn-sm {
   padding: 11px 20px;
-  font-size: 13px;
+  font-size: 12.5px;
 }
 
-/* header */
-header {
+/* header — public site only. Guarded against .admin-app: this bare tag
+   selector was beating the admin Topbar's own Tailwind classes (bg-white,
+   sticky positioning) in the cascade, same as the h1–h4 leak above. */
+header:not(.admin-app *) {
   position: sticky;
   top: 0;
   z-index: 50;
@@ -150,7 +226,7 @@ header {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  height: 74px;
+  height: 68px;
 }
 .brand {
   display: flex;
@@ -162,7 +238,7 @@ header {
   align-items: center;
 }
 .logo {
-  height: 28px;
+  height: 35px;
   width: auto;
   display: block;
 }
@@ -186,8 +262,21 @@ header {
   display: flex;
   align-items: center;
   gap: 30px;
-  font: 400 14px/1 var(--font-body);
+  font: 500 12.5px/1 var(--font-body);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
   color: #fff;
+}
+.navlinks a,
+.navlinks .dropdown {
+  transition: opacity 0.2s ease;
+}
+.navlinks a:hover,
+.navlinks .dropdown:hover {
+  opacity: 0.78;
+}
+.navlinks .btn-primary {
+  text-transform: uppercase;
 }
 .navlinks .count {
   font: 400 9px/1 var(--font-mono-stack);
@@ -233,9 +322,11 @@ header {
   margin-top: 0;
   background: var(--surface);
   border: 1px solid var(--border);
-  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.08);
+  border-radius: 10px;
+  box-shadow: 0 16px 36px rgba(45, 33, 27, 0.12);
   padding: 10px;
   min-width: 220px;
+  overflow: hidden;
 }
 .dropdown:hover .dropdown-panel {
   display: block;
@@ -243,11 +334,18 @@ header {
 .dropdown-panel a {
   display: block;
   padding: 10px 12px;
-  font: 400 13.5px/1 var(--font-body);
+  border-radius: 6px;
+  font: 400 13px/1 var(--font-body);
+  letter-spacing: normal;
+  text-transform: none;
   color: var(--fg);
+  opacity: 1;
+  transition: background-color 0.15s ease, color 0.15s ease;
 }
 .dropdown-panel a:hover {
   color: var(--accent);
+  background: var(--bg);
+  opacity: 1;
 }
 
 /* generic page hero (non-home pages) */
@@ -266,7 +364,7 @@ header {
   margin: 16px 0 0;
   font: 400 15.5px/1.7 var(--font-body);
   color: var(--muted);
-  max-width: 640px;
+  max-width: 800px;
 }
 .breadcrumb {
   font: 400 11px/1 var(--font-mono-stack);
@@ -310,46 +408,89 @@ h3 {
   max-width: 640px;
 }
 
-/* hero (home) */
-.hero {
-  padding: 76px 0 0;
+/* hero (home) — full-bleed layered image + inline content column, matches
+   redesign/Homepage Hero.dc.html turn 2 "2a" exactly. */
+.hero2 {
+  position: relative;
+  display: flex;
+  align-items: center;
+  min-height: 620px;
+  overflow: hidden;
+  background: #faf6ee;
 }
-.hero h1 {
-  margin: 26px 0 0;
-  font: 400 clamp(32px, 5.2vw, 58px)/1.1 var(--font-head);
-  letter-spacing: -0.015em;
-  max-width: 780px;
+.hero2-media {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
 }
-.hero p.sub {
-  margin: 26px 0 0;
+.hero2-img {
+  position: absolute;
+  top: 0;
+  right: 0;
+  height: 100%;
+  width: auto;
+  max-width: none;
+  object-fit: cover;
+  object-position: right center;
+}
+.hero2-scrim {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(to right, #faf6ee 0%, #faf6ee 26%, rgba(250, 246, 238, 0.85) 38%, rgba(250, 246, 238, 0) 56%);
+}
+.hero2 > .wrap {
+  position: relative;
+  z-index: 1;
+  /* .hero2 is a flex row (for vertical centering); flex items shrink to
+     fit content by default instead of stretching to max-width, so without
+     this, .wrap collapses to its content's width and ends up centered in
+     the viewport instead of matching every other section's left margin. */
+  width: 100%;
+}
+.hero2-content {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  max-width: 600px;
+  padding: 76px 0;
+}
+.hero2-content h1 {
+  margin: 0;
+  font: 400 clamp(34px, 4.6vw, 60px)/1.08 var(--font-head);
+  letter-spacing: -0.01em;
+  color: var(--fg);
+  text-wrap: balance;
+}
+.hero2-content .sub {
+  margin: 0;
+  max-width: 42ch;
   font: 400 17px/1.7 var(--font-body);
   color: var(--muted);
-  max-width: 560px;
 }
 .hero-cta {
   display: flex;
   align-items: center;
-  gap: 16px;
-  margin-top: 34px;
+  gap: 14px;
   flex-wrap: wrap;
 }
-.hero-cta .note {
-  font: 400 13px/1 var(--font-mono-stack);
-  color: var(--muted);
+.hero2-promise {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  flex-wrap: wrap;
+  padding-top: 22px;
+  border-top: 1px solid var(--border);
+  font: 400 11.5px/1 var(--font-mono-stack);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--faint);
 }
-.hero-imgs {
-  margin-top: 52px;
-  display: grid;
-  grid-template-columns: 1.6fr 1fr;
-  gap: 14px;
+.hero2-promise .label {
+  color: var(--gold);
 }
-.hero-imgs .big {
-  height: 340px;
-}
-.hero-imgs .stack {
-  display: grid;
-  grid-template-rows: 1fr 1fr;
-  gap: 14px;
+.hero2-promise .more {
+  margin-left: auto;
+  color: var(--accent);
 }
 .swatch {
   border: 1px solid var(--border);
@@ -478,7 +619,7 @@ h3 {
 .diff-wrap {
   display: grid;
   grid-template-columns: 0.85fr 1.15fr;
-  gap: 56px;
+  gap: 300px;
 }
 .diff-wrap p {
   margin: 18px 0 0;
@@ -638,6 +779,95 @@ h3 {
   flex-wrap: wrap;
   font: 400 11.5px/1 var(--font-mono-stack);
   color: var(--accent);
+}
+
+/* featured collections (home) — matches redesign/ mockup's exact grid math:
+   1.6fr/1fr/1fr columns, 290px/230px rows, first item tall-left (row span
+   2), fourth item wide-bottom (column span 2); cream chip labels, no scrim. */
+.collgrid {
+  margin-top: 26px;
+  display: grid;
+  grid-template-columns: 1.6fr 1fr 1fr;
+  grid-template-rows: 290px 230px;
+  gap: 18px;
+}
+.collcard {
+  position: relative;
+  display: block;
+  overflow: hidden;
+  background: #e9e1d3;
+}
+.collcard.tall {
+  grid-row: span 2;
+}
+.collcard.wide {
+  grid-column: span 2;
+}
+.collcard img,
+.collcard .sw {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.35s ease;
+}
+.collcard:hover img,
+.collcard:hover .sw {
+  transform: scale(1.04);
+}
+.collcard-label {
+  position: absolute;
+  left: 18px;
+  bottom: 18px;
+  font: 400 21px/1.2 var(--font-head);
+  color: var(--fg);
+  background: var(--bg);
+  padding: 8px 14px;
+}
+.collcard.tall .collcard-label {
+  left: 26px;
+  bottom: 24px;
+  font-size: 28px;
+  padding: 10px 18px;
+}
+
+/* best sellers (home) */
+.bsgrid {
+  margin-top: 26px;
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 22px;
+}
+.bscard {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  min-width: 0;
+}
+.bscard-img {
+  aspect-ratio: 4 / 5;
+  background: #e9e1d3;
+  overflow: hidden;
+}
+.bscard-img img,
+.bscard-img .sw {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.35s ease;
+}
+.bscard:hover .bscard-img img,
+.bscard:hover .bscard-img .sw {
+  transform: scale(1.04);
+}
+.bscard .name {
+  font: 400 16px/1.3 var(--font-head);
+  color: var(--fg);
+}
+.bscard .price {
+  font: 500 14px/1 var(--font-body);
+  color: var(--muted);
 }
 
 /* product category grid */
@@ -973,10 +1203,13 @@ footer {
 }
 .foot-social {
   display: flex;
-  gap: 18px;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 16px;
   margin-top: 18px;
-  font: 400 11px/1 var(--font-mono-stack);
-  letter-spacing: 0.08em;
+}
+.foot-social img {
+  opacity: 0.75;
 }
 .foot-addr {
   margin: 0;
@@ -1008,7 +1241,7 @@ footer {
   }
   .navlinks {
     position: fixed;
-    inset: 74px 0 0 0;
+    inset: 68px 0 0 0;
     background: var(--surface);
     color: var(--fg);
     flex-direction: column;
@@ -1056,11 +1289,37 @@ footer {
   .dropdown:hover .dropdown-panel {
     display: block;
   }
-  .hero {
-    padding-top: 40px;
+  .hero2 {
+    display: block;
+    min-height: 0;
   }
-  .hero-imgs {
-    grid-template-columns: 1fr;
+  .hero2-media {
+    position: relative;
+    inset: auto;
+    width: 100%;
+    aspect-ratio: 1672 / 941;
+  }
+  .hero2-img {
+    top: 0;
+    left: 0;
+    right: 0;
+    width: 100%;
+    height: 100%;
+    object-position: center;
+  }
+  .hero2-scrim {
+    background: linear-gradient(to top, var(--bg) 0%, rgba(247, 243, 234, 0) 34%);
+  }
+  .hero2-content {
+    max-width: none;
+    padding: 28px 0 32px;
+  }
+  .hero2-promise {
+    gap: 16px;
+  }
+  .hero2-promise .more {
+    margin-left: 0;
+    width: 100%;
   }
   .diff-wrap,
   .mg,
@@ -1094,6 +1353,25 @@ footer {
   .catgrid {
     grid-template-columns: 1fr;
   }
+  .collgrid {
+    grid-template-columns: repeat(2, 1fr);
+    grid-template-rows: none;
+    grid-auto-rows: 200px;
+    gap: 14px;
+  }
+  .collcard.tall {
+    grid-column: span 2;
+    grid-row: span 1;
+    aspect-ratio: 16 / 10;
+    height: auto;
+  }
+  .collcard.wide {
+    grid-column: span 1;
+  }
+  .bsgrid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 14px;
+  }
   .certgrid {
     grid-template-columns: 1fr 1fr;
   }
@@ -1107,3 +1385,4 @@ footer {
     padding: 44px 0;
   }
 }
+

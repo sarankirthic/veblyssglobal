@@ -1,6 +1,8 @@
 import Link from "next/link";
-import { getCategories, getSettings } from "@/lib/data";
+import Image from "next/image";
+import { getCategories, getGalleryAlbums, getProducts, getSettings } from "@/lib/data";
 import { CtaBand } from "@/components/layout/CtaBand";
+import { getCategoryContent } from "@/lib/category-content";
 
 const DEFAULT_DIFFERENTIATORS = [
   {
@@ -45,88 +47,125 @@ const GALLERY_TILES = [
 ];
 
 export default async function HomePage() {
-  const [categories, settings] = await Promise.all([getCategories(), getSettings()]);
+  const [categories, settings, albums] = await Promise.all([
+    getCategories(),
+    getSettings(),
+    getGalleryAlbums(),
+  ]);
   const differentiators = settings.differentiators?.length ? settings.differentiators : DEFAULT_DIFFERENTIATORS;
+  const albumImages = albums.flatMap((a) => a.images ?? []).slice(0, 6);
+
+  const categoryCovers = await Promise.all(
+    categories.map((c) => getProducts({ category: c.slug, perPage: 6 }).then((r) => r.items.find((p) => p.images[0])?.images[0]))
+  );
+
+  const bestSellers = await getProducts({ featured: true, perPage: 4 }).then((r) => r.items);
 
   return (
     <>
-      <div className="hero wrap">
-        <div className="eyebrow">Handcrafted in India, For the World</div>
-        <h1>Everyday Pieces, Made By Hand</h1>
-        <p className="sub">
-          From Dharavi&apos;s leather workshops to Jaipur&apos;s jewellers — every VeBlyss piece is made by named
-          artisan communities using techniques passed down for generations. Thoughtfully made, not mass-produced.
-        </p>
-        <div className="hero-cta">
-          <Link className="btn btn-primary" href="/products">
-            Shop the Collection
-          </Link>
-          <Link className="btn btn-outline" href="/about">
-            Meet the Artisans
-          </Link>
-          <span className="note">We reply within 24 hours</span>
+      <section className="hero2">
+        <div className="hero2-media">
+          <Image
+            src="/assets/hero.png"
+            alt="VeBlyss handcrafted leather, copperware and home decor, styled together"
+            width={1672}
+            height={941}
+            priority
+            sizes="(max-width: 880px) 100vw, 1180px"
+            className="hero2-img"
+          />
+          <div className="hero2-scrim" />
         </div>
-        <div className="hero-imgs">
-          <div className="swatch big sw-leather">
-            <span>01 — LEATHER / DHARAVI, MUMBAI</span>
-          </div>
-          <div className="stack">
-            <div className="swatch sw-copper">
-              <span>02 — COPPER / FOOD-SAFE</span>
+        <div className="wrap">
+          <div className="hero2-content">
+            <div className="eyebrow">Handmade in India</div>
+            <h1>The Soul of India, Curated for the World</h1>
+            <p className="sub">
+              Discover handcrafted products, timeless traditions, and contemporary expressions of India&apos;s rich
+              heritage.
+            </p>
+            <div className="hero-cta">
+              <Link className="btn btn-primary" href="/products">
+                Shop Collection
+              </Link>
+              <Link className="btn btn-outline" href="/about">
+                Meet the Artisans
+              </Link>
             </div>
-            <div className="swatch sw-craft">
-              <span>03 — HOME DECOR / WOOD, CLAY</span>
+            <div className="hero2-promise">
+              <span className="label">The VeBlyss Promise</span>
+              <span>Handcrafted</span>
+              <span>Named Artisan Communities</span>
+              <span>Ethically Sourced</span>
+              <span>Plastic-Free Packaging</span>
+              <Link className="more" href="/our-promise">
+                Our Promise →
+              </Link>
             </div>
           </div>
         </div>
-        <div className="certstrip">
-          <span className="label">The VeBlyss Promise</span>
-          <span>HANDCRAFTED</span>
-          <span>NAMED ARTISAN COMMUNITIES</span>
-          <span>ETHICALLY SOURCED</span>
-          <span>PLASTIC-FREE PACKAGING</span>
-          <span>SMALL-BATCH</span>
-          <span>MADE TO LAST</span>
-          <Link className="more" href="/our-promise">
-            Our Promise →
-          </Link>
-        </div>
-      </div>
+      </section>
 
       <section id="products">
         <div className="wrap">
           <div className="section-head">
-            <h2>Shop by Category</h2>
-            <span className="meta">{categories.length} categories, each handmade</span>
+            <h2>Featured Collections</h2>
+            <Link className="meta accent" href="/products">
+              View all
+            </Link>
           </div>
-          <div className="table">
-            <div className="row head">
-              <span>No.</span>
-              <span>Category</span>
-              <span>What You&apos;ll Find</span>
-              <span>Origin</span>
-              <span style={{ textAlign: "right" }}>&nbsp;</span>
+          {categories.length === 0 ? (
+            <div className="empty-state">
+              <div className="eyebrow">Catalogue coming soon</div>
+              <p>Categories will appear here once the catalogue is published.</p>
             </div>
-            {categories.length === 0 ? (
-              <div style={{ padding: 40 }} className="lede">
-                Categories will appear here once the catalogue is published.
-              </div>
-            ) : (
-              categories.map((c, i) => (
-                <div className="row" key={c.id}>
-                  <span className="no">{String(i + 1).padStart(2, "0")}</span>
-                  <Link className="cat" href={`/products/${c.slug}`}>
-                    {c.name}
+          ) : (
+            <div className="collgrid">
+              {categories.map((c, i) => {
+                const cover = categoryCovers[i];
+                const content = getCategoryContent(c.slug);
+                return (
+                  <Link key={c.id} href={`/products/${c.slug}`} className={`collcard ${i === 0 ? "tall" : ""} ${i === 3 ? "wide" : ""}`}>
+                    {cover ? (
+                      // eslint-disable-next-line @next/next/no-img-element
+                      <img src={cover} alt={c.name} />
+                    ) : (
+                      <div className={`sw ${content.swatchClass}`}></div>
+                    )}
+                    <span className="collcard-label">{c.name}</span>
                   </Link>
-                  <span className="focus">{c.description ?? ""}</span>
-                  <span className="origin">{c.originRegion ?? "Multi-region"}</span>
-                  <span className="moq"></span>
-                </div>
-              ))
-            )}
-          </div>
+                );
+              })}
+            </div>
+          )}
         </div>
       </section>
+
+      {bestSellers.length > 0 && (
+        <section>
+          <div className="wrap">
+            <div className="section-head">
+              <h2>Best Sellers</h2>
+            </div>
+            <div className="bsgrid">
+              {bestSellers.map((p) => (
+                <Link key={p.id} href={`/products/${p.categorySlug}/${p.slug}`} className="bscard">
+                  <div className="bscard-img">
+                    {p.images[0] ? (
+                      // eslint-disable-next-line @next/next/no-img-element
+                      <img src={p.images[0]} alt={p.name} />
+                    ) : (
+                      <div className="sw" />
+                    )}
+                  </div>
+                  <span className="name">{p.name}</span>
+                  <span className="price">{p.priceRange ?? "Enquire for pricing"}</span>
+                </Link>
+              ))}
+            </div>
+          </div>
+        </section>
+      )}
 
       <section style={{ background: "var(--surface)", borderTop: "1px solid var(--border)", borderBottom: "1px solid var(--border)" }}>
         <div className="wrap diff-wrap">
@@ -194,11 +233,16 @@ export default async function HomePage() {
               </Link>
             </div>
             <div className="gallery-grid">
-              {GALLERY_TILES.map((t) => (
-                <div className={`gtile ${t.cls}`} key={t.cls}>
-                  <span>{t.label}</span>
-                </div>
-              ))}
+              {albumImages.length > 0
+                ? albumImages.map((img) => (
+                    // eslint-disable-next-line @next/next/no-img-element
+                    <img key={img.id} src={img.url} alt={img.altText ?? ""} style={{ aspectRatio: "1", objectFit: "cover", width: "100%" }} />
+                  ))
+                : GALLERY_TILES.map((t) => (
+                    <div className={`gtile ${t.cls}`} key={t.cls}>
+                      <span>{t.label}</span>
+                    </div>
+                  ))}
             </div>
           </div>
         </div>

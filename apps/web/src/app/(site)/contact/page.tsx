@@ -11,6 +11,7 @@ export const metadata: Metadata = {
 export default async function ContactPage() {
   const [categories, settings] = await Promise.all([getCategories(), getSettings()]);
   const contact = settings.contact_details ?? {};
+  const locations = contact.locations ?? [];
 
   return (
     <>
@@ -30,34 +31,22 @@ export default async function ContactPage() {
           </div>
 
           <div>
-            <div className="office-card">
-              <div className="lbl">Our Studio in Bengaluru</div>
-              <p>
-                VeBlyss Global Pvt Ltd
-                <br />
-                2619, 36th A Cross, 26th Main
-                <br />
-                4th T Block, 9th Block Post, Jayanagar
-                <br />
-                Bengaluru, Karnataka - 560041
-                <br />
-                {contact.phone ?? "+91 80 2658 2427 / +91 98448 44225"}
-              </p>
-            </div>
-            <div className="office-card">
-              <div className="lbl">Our Studio in London</div>
-              <p>
-                VeBlyss Limited
-                <br />
-                71–75 Shelton Street
-                <br />
-                Covent Garden
-                <br />
-                London, WC2H 9JQ, United Kingdom
-                <br />
-                {contact.whatsapp ?? "+44 7722 184477"} (also WhatsApp)
-              </p>
-            </div>
+            {locations.map((loc) => (
+              <div className="office-card" key={loc.id}>
+                <div className="lbl">Our Office in {loc.city}</div>
+                <p>
+                  {loc.companyName}
+                  {loc.address.split("\n").map((line, i) => (
+                    <span key={i}>
+                      <br />
+                      {line}
+                    </span>
+                  ))}
+                  <br />
+                  {loc.phone ?? contact.phone ?? ""}
+                </p>
+              </div>
+            ))}
             <div style={{ display: "flex", gap: 12, flexWrap: "wrap" }}>
               <a className="btn btn-primary btn-sm" href={`mailto:${contact.email ?? "info@veblyssglobal.com"}`}>
                 Email Us
@@ -70,9 +59,9 @@ export default async function ContactPage() {
               >
                 WhatsApp
               </a>
-              <a className="btn btn-outline btn-sm" href="#lookbook" id="lookbook">
-                Browse Our Lookbook
-              </a>
+              {/*<a className="btn btn-outline btn-sm" href="#lookbook" id="lookbook">*/}
+              {/*  Browse Our Lookbook*/}
+              {/*</a>*/}
             </div>
             <p className="response-note">We respond within 24 hours · LinkedIn · Facebook · Instagram</p>
           </div>
@@ -81,18 +70,14 @@ export default async function ContactPage() {
 
       <section style={{ background: "var(--surface)", borderTop: "1px solid var(--border)" }}>
         <div className="wrap mg">
-          <div>
-            <h2 style={{ fontSize: 22 }}>Bengaluru studio</h2>
-            <div className="swatch" style={{ height: 220, marginTop: 16 }} aria-hidden="true">
-              <span>Bengaluru, Karnataka — embedded map placeholder</span>
+          {locations.map((loc) => (
+            <div key={loc.id}>
+              <h2 style={{ fontSize: 22 }}>{loc.city} studio</h2>
+              <div className="swatch" style={{ height: 220, marginTop: 16 }} aria-hidden="true">
+                <span>{loc.city} — embedded map placeholder</span>
+              </div>
             </div>
-          </div>
-          <div>
-            <h2 style={{ fontSize: 22 }}>London studio</h2>
-            <div className="swatch" style={{ height: 220, marginTop: 16 }} aria-hidden="true">
-              <span>Covent Garden, London — embedded map placeholder</span>
-            </div>
-          </div>
+          ))}
         </div>
       </section>
     </>

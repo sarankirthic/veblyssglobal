@@ -22,8 +22,8 @@ const PILLARS = [
   },
   {
     n: "04",
-    title: "Safety Standards That Apply",
-    body: "Copperware and food-adjacent items meet FSSAI food-safety standards; materials meet relevant international marks including CE, REACH and ISO where applicable.",
+    title: "Backed by Real Certifications",
+    body: "16 certifications and registrations cover our products and export operations — CE, RoHS, FDA, ISO and REACH for manufactured goods; FSSAI, APEDA, Spices Board, Tea Board and Phytosanitary for food and agri items; IEC, FIEO, GST, DGFT, MSME Udyam and Certificate of Origin for export compliance.",
   },
   {
     n: "05",
@@ -64,7 +64,11 @@ export default function OurPromisePage() {
             ))}
           </div>
           <p className="lede" style={{ marginTop: 30 }}>
-            Want more detail on how a specific piece is made? Ask us — we&apos;re happy to share.
+            Want more detail on how a specific piece is made? Ask us — we&apos;re happy to share. See the full{" "}
+            <Link href="/certifications" className="accent">
+              list of certifications
+            </Link>{" "}
+            behind our products and export operations.
           </p>
         </div>
       </section>

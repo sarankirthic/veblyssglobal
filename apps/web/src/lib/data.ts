@@ -58,6 +58,19 @@ export async function getProducts(params?: {
   }
 }
 
+export async function getProductBySlug(slug: string): Promise<Product | null> {
+  try {
+    const res = await apiFetch<{ data: Product[]; meta: PageMeta }>(
+      `/api/v1/products?slug=${encodeURIComponent(slug)}`,
+      { revalidate: 120 }
+    );
+    return res.data[0] ?? null;
+  } catch (err) {
+    console.error(err);
+    return null;
+  }
+}
+
 export async function getSettings(): Promise<SiteSettings> {
   try {
     const res = await apiFetch<{ data: SiteSettings }>("/api/v1/settings", { revalidate: 300 });

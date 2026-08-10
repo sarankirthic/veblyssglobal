@@ -10,10 +10,10 @@ export function Banner({
   return (
     <div
       className={cn(
-        "border px-4 py-3 text-sm",
+        "rounded-adm-sm border px-4 py-3 text-sm",
         tone === "danger"
-          ? "border-adm-danger/30 bg-adm-danger/5 text-adm-danger"
-          : "border-adm-success/30 bg-adm-success/5 text-adm-success"
+          ? "border-adm-danger/20 bg-adm-danger/5 text-adm-danger"
+          : "border-adm-success/20 bg-adm-success/5 text-adm-success"
       )}
     >
       {children}

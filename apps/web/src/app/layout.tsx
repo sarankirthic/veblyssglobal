@@ -1,17 +1,21 @@
 import type { Metadata } from "next";
-import { DM_Sans, DM_Serif_Display, DM_Mono } from "next/font/google";
+import { Marcellus, Karla, DM_Mono, Geist } from "next/font/google";
 import "./globals.css";
 import { Providers } from "@/lib/providers";
+import { cn } from "@/lib/utils";
 
-const dmSerifDisplay = DM_Serif_Display({
-  variable: "--font-dm-serif-display",
+const geist = Geist({ subsets: ["latin"], variable: "--font-sans" });
+
+// Matches redesign/ mockup exactly: Marcellus (headlines) + Karla (nav/body/UI).
+const marcellus = Marcellus({
+  variable: "--font-marcellus",
   weight: "400",
   subsets: ["latin"],
 });
 
-const dmSans = DM_Sans({
-  variable: "--font-dm-sans",
-  weight: ["400", "500", "700"],
+const karla = Karla({
+  variable: "--font-karla",
+  weight: ["400", "500", "600", "700"],
   subsets: ["latin"],
 });
 
@@ -33,8 +37,11 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
-      <body className={`${dmSerifDisplay.variable} ${dmSans.variable} ${dmMono.variable}`}>
+    <html
+      lang="en"
+      className={cn("font-sans", geist.variable, marcellus.variable, karla.variable, dmMono.variable)}
+    >
+      <body>
         <Providers>{children}</Providers>
       </body>
     </html>

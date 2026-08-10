@@ -8,10 +8,10 @@ import { CtaBand } from "@/components/layout/CtaBand";
 export async function generateMetadata({
   params,
 }: {
-  params: Promise<{ slug: string }>;
+  params: Promise<{ categorySlug: string }>;
 }): Promise<Metadata> {
-  const { slug } = await params;
-  const category = await getCategoryBySlug(slug);
+  const { categorySlug } = await params;
+  const category = await getCategoryBySlug(categorySlug);
   if (!category) return {};
 
   return {
@@ -23,20 +23,27 @@ export async function generateMetadata({
 export default async function CategoryDetailPage({
   params,
 }: {
-  params: Promise<{ slug: string }>;
+  params: Promise<{ categorySlug: string }>;
 }) {
-  const { slug } = await params;
-  const category = await getCategoryBySlug(slug);
+  const { categorySlug } = await params;
+  const category = await getCategoryBySlug(categorySlug);
   if (!category) notFound();
 
   const [{ items: products }, allCategories] = await Promise.all([
-    getProducts({ category: slug, perPage: 12 }),
+    getProducts({ category: categorySlug, perPage: 12 }),
     getCategories(),
   ]);
 
-  const content = getCategoryContent(slug);
+  const fallback = getCategoryContent(categorySlug);
+  const content = {
+    heroHeadline: category.heroHeadline || fallback.heroHeadline,
+    whyChoose: category.whyChoose.length > 0 ? category.whyChoose : fallback.whyChoose,
+    guarantee: category.guarantee || fallback.guarantee,
+    idealFor: category.idealFor.length > 0 ? category.idealFor : fallback.idealFor,
+    swatchClass: fallback.swatchClass,
+  };
   const featured = products.find((p) => p.featured) ?? products[0];
-  const related = allCategories.filter((c) => c.slug !== slug).slice(0, 2);
+  const related = allCategories.filter((c) => c.slug !== categorySlug).slice(0, 2);
 
   return (
     <>
@@ -64,13 +71,18 @@ export default async function CategoryDetailPage({
           ) : (
             <div className="catgrid">
               {products.map((p) => (
-                <div className="catcard" key={p.id}>
-                  <div className={`sw ${content.swatchClass}`}></div>
+                <Link className="catcard" key={p.id} href={`/products/${categorySlug}/${p.slug}`}>
+                  {p.images[0] ? (
+                    // eslint-disable-next-line @next/next/no-img-element
+                    <img src={p.images[0]} alt={p.name} className="sw" style={{ width: "100%", objectFit: "cover" }} />
+                  ) : (
+                    <div className={`sw ${content.swatchClass}`}></div>
+                  )}
                   <div className="body">
                     <h3>{p.name}</h3>
                     <p>{p.shortDescription}</p>
                   </div>
-                </div>
+                </Link>
               ))}
             </div>
           )}
@@ -86,12 +98,26 @@ export default async function CategoryDetailPage({
             </div>
             <div className="speccard" style={{ marginTop: 22 }}>
               <div className="imgs">
-                <div className={`swatch ${content.swatchClass}`} style={{ border: 0 }}>
-                  <span>PRIMARY</span>
-                </div>
-                <div className={`swatch ${content.swatchClass}`} style={{ border: 0 }}>
-                  <span>DETAIL</span>
-                </div>
+                {featured.images[0] ? (
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img src={featured.images[0]} alt={featured.name} style={{ width: "100%", minHeight: 220, objectFit: "cover" }} />
+                ) : (
+                  <div className={`swatch ${content.swatchClass}`} style={{ border: 0 }}>
+                    <span>PRIMARY</span>
+                  </div>
+                )}
+                {featured.images[1] ?? featured.images[0] ? (
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img
+                    src={featured.images[1] ?? featured.images[0]}
+                    alt={featured.name}
+                    style={{ width: "100%", minHeight: 220, objectFit: "cover" }}
+                  />
+                ) : (
+                  <div className={`swatch ${content.swatchClass}`} style={{ border: 0 }}>
+                    <span>DETAIL</span>
+                  </div>
+                )}
               </div>
               <div className="spec-table">
                 {featured.materials && (

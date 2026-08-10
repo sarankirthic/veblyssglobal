@@ -17,6 +17,20 @@ BACKEND_PORT=4000
 FRONTEND_PORT=3000
 LOCAL_IP=$(ipconfig getifaddr en0 2>/dev/null || hostname -I 2>/dev/null | awk '{print $1}' || echo "localhost")
 
+# Dev mode prints the LAN URL (below) as if it's usable, but a login there
+# silently fails otherwise: the browser's Origin is http://$LOCAL_IP:3000,
+# which a static CORS_ORIGINS in .env has no way to list in advance (IP
+# changes with the network). Widen it in-process for dev only -- never in
+# prod, where CORS_ORIGINS must stay exactly what's configured.
+_widen_cors_for_lan() {
+  [[ -n "${LOCAL_IP:-}" && "$LOCAL_IP" != "localhost" ]] || return 0
+  local lan_origin="http://${LOCAL_IP}:${FRONTEND_PORT}"
+  case ",${CORS_ORIGINS:-}," in
+    *",${lan_origin},"*) ;;  # already present, nothing to do
+    *) export CORS_ORIGINS="${CORS_ORIGINS:+${CORS_ORIGINS},}${lan_origin}" ;;
+  esac
+}
+
 MODE="${1:-dev}"
 SUBCMD="${2:-}"
 case "$MODE" in
@@ -53,6 +67,7 @@ _restart_backend() {
   info "Restarting backend ($mode)..."
   set -a; source "$SERVER/.env"; set +a
   export FLASK_APP="${FLASK_APP:-wsgi}"
+  [[ "$mode" == "dev" ]] && _widen_cors_for_lan
   cd "$SERVER"
   if [[ "$mode" == "dev" ]]; then
     "$VENV/bin/flask" run --host=0.0.0.0 --port="$BACKEND_PORT" \
@@ -166,6 +181,7 @@ set +a
 export FLASK_APP="${FLASK_APP:-wsgi}"
 export FLASK_ENV="${FLASK_ENV:-development}"
 [[ "$MODE" == "prod" ]] && export FLASK_ENV=production
+[[ "$MODE" == "dev" ]] && _widen_cors_for_lan
 ok ".env loaded (FLASK_ENV=$FLASK_ENV)"
 
 if [[ "$MODE" == "prod" ]]; then

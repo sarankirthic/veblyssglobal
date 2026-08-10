@@ -39,7 +39,7 @@ export function TrafficChart({ series }: { series: TrafficPoint[] }) {
                 width={barWidth}
                 height={barHeight}
                 rx={Math.min(4, barWidth / 2)}
-                fill="var(--adm-navy)"
+                fill="var(--adm-primary)"
               >
                 <title>
                   {p.date}: {p.count} pageviews
