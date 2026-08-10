@@ -12,10 +12,10 @@ services:
     ports:
       - "6379:6379"
 
-  api:
+  veblyss.api:
     ports:
       - "4000:4000"
 
-  web:
+  veblyss.web:
     ports:
       - "3000:3000"
