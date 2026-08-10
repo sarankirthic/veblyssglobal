@@ -187,6 +187,57 @@ Two supported paths — pick one, don't run both against the same domain:
   service is off by default (`profiles: ["tunnel"]`) — only enable it if a Cloudflare
   Tunnel is deliberately replacing the platform's own ingress, not running alongside it.
 
+## Production operations
+
+<details>
+<summary><strong>Run a DB migration on prod</strong></summary>
+
+Write + test the migration locally first (never `db migrate` against prod):
+
+```bash
+cd apps/api
+flask --app wsgi.py db migrate -m "describe change"
+flask --app wsgi.py db upgrade   # test against local DB
+```
+
+Commit the generated file under `apps/api/migrations/versions/` and deploy as usual.
+Then, on the prod host, apply it inside the running api container:
+
+```bash
+docker compose ps                              # find the api container
+docker compose exec api flask --app wsgi.py db upgrade
+```
+
+No `docker compose` on the host? Plain docker works too:
+
+```bash
+docker exec -it <api-container-id> flask --app wsgi.py db upgrade
+```
+
+Back up first — prod data, no undo:
+
+```bash
+docker compose exec postgres pg_dump -U veblyss veblyss > backup_$(date +%F).sql
+```
+</details>
+
+<details>
+<summary><strong>Add a new admin/editor/viewer user on prod</strong></summary>
+
+Use the `create-admin` CLI (`apps/api/app/auth/cli.py`) — idempotent, safe to re-run to reset a password or role:
+
+```bash
+docker compose exec api flask --app wsgi.py create-admin \
+  --email person@veblyssglobal.com \
+  --name "Person Name" \
+  --password "strong-real-password" \
+  --role admin        # or editor / viewer
+```
+
+Running the API bare (no Docker)? Drop the `docker compose exec api` prefix and run the
+`flask` command directly on the host.
+</details>
+
 ## For maintainers
 
 Architecture deviations, gotchas already hit and fixed, and code conventions live in

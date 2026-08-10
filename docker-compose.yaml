@@ -28,7 +28,7 @@ services:
     image: redis:7-alpine
     restart: unless-stopped
 
-  api:
+  veblyss.api:
     build:
       context: .
       dockerfile: Dockerfile.api
@@ -50,7 +50,7 @@ services:
       start_period: 10s
       retries: 3
 
-  web:
+  veblyss.web:
     build:
       context: .
       dockerfile: Dockerfile.web
