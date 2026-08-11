@@ -133,7 +133,7 @@ docker compose up --build   # postgres + redis + api + web, all wired together
 
 `docker-compose.override.yml` (auto-merged, local-dev-only) publishes each service to its
 usual host port (`:5432`, `:6379`, `:4000`, `:3000`). `docker-compose.yaml` alone — no
-`docker-compose.override.yml` — is what a host like Coolify deploys; see
+`docker-compose.override.yml` — is what Dokploy deploys; see
 [Deployment](#deployment) below.
 </details>
 
@@ -162,9 +162,9 @@ veblyss/
 │   └── api/           Flask REST API
 ├── docs/                Planning docs — architecture, sitemap, brand guide, content audit
 ├── Dockerfile.api          Container build for apps/api
-├── Dockerfile.web           Container build for apps/web (self-hosted/Coolify — Vercel doesn't use this)
+├── Dockerfile.web           Container build for apps/web (self-hosted/Dokploy — Vercel doesn't use this)
 ├── docker/entrypoint-api.sh    Runs `flask db upgrade` before gunicorn starts (see Production operations)
-├── docker-compose.yaml         Full-stack orchestration — the file Coolify deploys
+├── docker-compose.yaml         Full-stack orchestration — the file Dokploy deploys
 ├── docker-compose.override.yml Local-dev-only host port publishing (auto-merged)
 └── start.sh                      One-command dev/prod orchestration
 ```
@@ -179,10 +179,10 @@ Two supported paths — pick one, don't run both against the same domain:
 - **Vercel + container host** — `apps/web` deploys to Vercel (Next.js 15, App Router, zero
   extra config beyond `NEXT_PUBLIC_API_URL`); `apps/api` ships as a container via
   `Dockerfile.api` to wherever you host it.
-- **Fully self-hosted (e.g. Coolify, Dokploy)** — `docker-compose.yaml` deploys the whole
+- **Fully self-hosted via Dokploy** — `docker-compose.yaml` deploys the whole
   stack (`postgres`, `redis`, `api`, `web`) as one unit. No service publishes a fixed host
-  port — routing is meant to go through the platform's own reverse proxy (Coolify's
-  Traefik, or your own nginx/Caddy). Set `NEXT_PUBLIC_API_URL` as a **build arg** for
+  port — routing is meant to go through Dokploy's own reverse proxy (Traefik). Set
+  `NEXT_PUBLIC_API_URL` as a **build arg** for
   the `web` service (see the comment in `Dockerfile.web` — it's baked into the browser
   bundle at build time, a runtime env var alone won't do it). `web`'s server-side fetches
   (SSR, admin pages) use `INTERNAL_API_URL` instead — hardcoded in `docker-compose.yaml`
@@ -196,9 +196,9 @@ Two supported paths — pick one, don't run both against the same domain:
     that file is gitignored and never exists on a host that deploys by cloning this
     repo. They're interpolated from the root `.env` instead (`${SECRET_KEY}` etc. in
     `docker-compose.yaml`), the same convention `NEXT_PUBLIC_API_URL` and
-    `CLOUDFLARE_TUNNEL_TOKEN` already use. Set them in your platform's own env var UI
-    (Coolify/Dokploy both write a `.env` next to `docker-compose.yaml`, which Compose
-    reads automatically) — see `apps/api/.env.example` for the full list and
+    `CLOUDFLARE_TUNNEL_TOKEN` already use. Set them in Dokploy's own env var UI
+    (it writes a `.env` next to `docker-compose.yaml`, which Compose reads
+    automatically) — see `apps/api/.env.example` for the full list and
     `PRODUCTION_CHECKLIST.md` for which ones still need real values.
 
 ## Production operations

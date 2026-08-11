@@ -1,0 +1,31 @@
+# Secondary safety net, not the primary defense: this session's Read/Grep/
+# Bash calls are hook-redirected to lean-ctx's ctx_* tools, which are
+# already .gitignore-aware on their own (see ctx_search's tool description) —
+# so node_modules/.next/.venv were already excluded from ctx_search before
+# this file existed. This still matters for tools the hook doesn't catch
+# (native Glob isn't in the PreToolUse matcher list) and for files that are
+# tracked, not gitignored, but still noise (pnpm-lock.yaml).
+
+node_modules/
+apps/web/node_modules/
+apps/web/.next/
+.turbo/
+
+apps/api/.venv/
+apps/api/__pycache__/
+apps/api/**/__pycache__/
+apps/api/*.egg-info/
+apps/api/.pytest_cache/
+
+pnpm-lock.yaml
+*.lock
+
+.git/
+.lean-ctx/
+.logs/
+
+dist/
+build/
+coverage/
+*.min.js
+*.min.css

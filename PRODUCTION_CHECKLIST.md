@@ -19,11 +19,11 @@ exactly that, not "implemented but untested."
 - **`.dockerignore`** added — without it, `Dockerfile.api`'s `COPY apps/api/ .` would
   have baked a local `apps/api/.env` (real secrets) straight into the image.
 - **`veblyss.api` no longer uses `env_file: apps/api/.env`** — that file is gitignored,
-  so it never existed on a host that deploys by cloning this repo (Coolify, Dokploy);
-  relying on it caused a hard `docker compose` failure in production. All of `api`'s
-  runtime secrets are now interpolated into `docker-compose.yaml` from the root `.env`
+  so it never existed on a host that deploys by cloning this repo (Dokploy); relying on
+  it caused a hard `docker compose` failure in production. All of `api`'s runtime
+  secrets are now interpolated into `docker-compose.yaml` from the root `.env`
   (`${SECRET_KEY}` etc.), the same convention `NEXT_PUBLIC_API_URL`/
-  `CLOUDFLARE_TUNNEL_TOKEN` already used — set them in your platform's env var UI.
+  `CLOUDFLARE_TUNNEL_TOKEN` already used — set them in Dokploy's env var UI.
 - **DB migrations run automatically on `api` boot** — `docker/entrypoint-api.sh` runs
   `flask db upgrade` before gunicorn starts. Safe on every restart (Alembic no-ops if
   already current); assumes a single `api` replica.
@@ -41,16 +41,16 @@ exactly that, not "implemented but untested."
   obviously-fake value in code review (see below — it still needs a *real* value).
 - **`apps/web` containerized** — `Dockerfile.web` (standalone Next.js build,
   non-root, healthcheck) and a `web` service in `docker-compose.yaml`, so the whole
-  stack (`postgres`, `redis`, `api`, `web`) can deploy as one Coolify/Docker Compose
+  stack (`postgres`, `redis`, `api`, `web`) can deploy as one Dokploy Docker Compose
   resource, not just `apps/api` — see the [Deployment](README.md#deployment) section
   of the README for the two supported paths.
-- **`docker-compose.yaml` reshaped for Coolify** — no service publishes a fixed host
-  port anymore (was `5432:5432`, `6379:6379`, `4000:4000`, fighting Coolify's own
+- **`docker-compose.yaml` reshaped for Dokploy** — no service publishes a fixed host
+  port anymore (was `5432:5432`, `6379:6379`, `4000:4000`, fighting Dokploy's own
   Traefik-based routing and risking port collisions on a shared host).
   `docker-compose.override.yml` (new) restores those fixed ports, but only for local
-  `docker compose up` — Coolify never reads that file.
+  `docker compose up` — Dokploy never reads that file.
 - **`cloudflared` made opt-in** (`profiles: ["tunnel"]`) — it was in `docker-compose.yaml`
-  from outside this session's work, unconditionally on; running it alongside Coolify's
+  from outside this session's work, unconditionally on; running it alongside Dokploy's
   own ingress is more likely to conflict than help, so it no longer starts by default.
 
 ## You still need to do
@@ -66,13 +66,13 @@ exactly that, not "implemented but untested."
 **Infrastructure decisions — not made yet:**
 - [ ] **Which deployment path.** `README.md`'s Deployment section lays out two:
   Vercel (web) + a container host (api), or everything self-hosted via
-  `docker-compose.yaml` (e.g. Coolify). Pick one per environment — don't end up with
+  `docker-compose.yaml` on Dokploy. Pick one per environment — don't end up with
   both `apps/web` on Vercel *and* the `web` service in `docker-compose.yaml` live at
   the same time, serving the same domain.
-- [ ] If self-hosting via Coolify: when you add this repo as a "Docker Compose"
-  resource, Coolify's UI will ask which domain/FQDN routes to which service (`api`,
-  `web`) — the exact env var convention it uses has changed across Coolify versions,
-  so confirm in Coolify's own UI/docs at deploy time rather than assuming a name here.
+- [ ] If self-hosting via Dokploy: when you add this repo as a "Docker Compose"
+  resource, Dokploy's UI will ask which domain/FQDN routes to which service (`api`,
+  `web`) — confirm the exact env var convention it expects in Dokploy's own UI/docs
+  at deploy time rather than assuming a name here.
 - [ ] Root `.vercel/project.json` still points at the Vercel project that served the
   now-deleted static HTML site. Decide: repoint at `apps/web`, or create a fresh project.
 - [ ] R2 bucket itself needs creating + its own CORS config (separate from the Flask
