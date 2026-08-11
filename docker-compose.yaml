@@ -9,8 +9,7 @@
 # reads this to know what to route to); postgres/redis don't need one at all
 # — nothing outside this stack should reach them directly.
 services:
-  postgres:
-    container_name: veblyss-postgres
+  veblyss.postgres:
     image: postgres:16-alpine
     restart: unless-stopped
     environment:
@@ -25,8 +24,7 @@ services:
       timeout: 5s
       retries: 10
 
-  redis:
-    container_name: veblyss-redis
+  veblyss.redis:
     image: redis:7-alpine
     restart: unless-stopped
     healthcheck:
@@ -35,8 +33,7 @@ services:
       timeout: 5s
       retries: 10
 
-  api:
-    container_name: veblyss-api
+  veblyss.api:
     build:
       context: .
       dockerfile: Dockerfile.api
@@ -79,8 +76,7 @@ services:
       start_period: 10s
       retries: 3
 
-  web:
-    container_name: veblyss-web
+  veblyss.web:
     build:
       context: .
       dockerfile: Dockerfile.web
@@ -109,9 +105,8 @@ services:
   # unless you're deliberately using the tunnel as ingress *instead* of
   # Dokploy's proxy. Decide which one is actually fronting traffic before
   # enabling this; running both is more likely to conflict than help.
-  cloudflared:
+  veblyss.cloudflared:
     profiles: ["tunnel"]
-    container_name: veblyss-tunnel
     image: 'cloudflare/cloudflared:latest'
     restart: unless-stopped
     command: 'tunnel --no-autoupdate run'
