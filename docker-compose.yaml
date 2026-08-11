@@ -9,7 +9,7 @@
 # reads this to know what to route to); postgres/redis don't need one at all
 # — nothing outside this stack should reach them directly.
 services:
-  postgres:
+  veblyss.postgres:
     image: postgres:16-alpine
     restart: unless-stopped
     environment:
@@ -24,7 +24,7 @@ services:
       timeout: 5s
       retries: 10
 
-  redis:
+  veblyss.redis:
     image: redis:7-alpine
     restart: unless-stopped
 
@@ -98,7 +98,7 @@ services:
   # unless you're deliberately using the tunnel as ingress *instead* of
   # Coolify's proxy. Decide which one is actually fronting traffic before
   # enabling this; running both is more likely to conflict than help.
-  cloudflared:
+  veblyss.cloudflared:
     profiles: ["tunnel"]
     container_name: cloudflare-tunnel
     image: 'cloudflare/cloudflared:latest'
