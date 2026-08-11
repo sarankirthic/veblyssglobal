@@ -31,18 +31,26 @@ exactly that, not "implemented but untested."
   healthcheck before this pass; `docker-compose.yaml` now also has matching
   `restart: unless-stopped` and a compose-level healthcheck on `api`, `postgres`,
   `redis` (redis's was missing until this pass — added `redis-cli ping`).
-- **Fixed a boot-blocking hostname bug (twice)** — service keys are the DNS names
-  Compose's internal network resolves; any internal reference (`DATABASE_URL`,
+- **Fixed a boot-blocking hostname bug (three times now)** — service keys are the DNS
+  names Compose's internal network resolves; any internal reference (`DATABASE_URL`,
   `REDIS_URL`, `INTERNAL_API_URL`, `depends_on`) that doesn't exactly match a real
   service key silently creates a phantom undefined service and either fails
   `docker compose config` outright or fails DNS resolution at runtime. Hit this once
   when service keys were briefly `veblyss.postgres`/`veblyss.redis`/`veblyss.api` and
   `DATABASE_URL`/`REDIS_URL` still said `postgres`/`redis`; hit it again the other
-  direction when keys were renamed back to short `postgres`/`redis`/`api`/`web` (with
+  direction when keys were renamed to short `postgres`/`redis`/`api`/`web` (with
   `container_name: veblyss-*` for display) but a few refs still said `veblyss.postgres`
-  etc. Both confirmed live via `docker compose up` before/after — current state (short
-  keys, matching internal refs) boots clean, migrates, and `web` successfully calls
-  `api` over `INTERNAL_API_URL: http://api:4000`.
+  etc.; hit it a third time when the short keys were deliberately reverted back to
+  dotted (`veblyss.postgres`/`veblyss.redis`/`veblyss.api`/`veblyss.web`/
+  `veblyss.cloudflared`, `container_name:` dropped) but `DATABASE_URL`, `REDIS_URL`,
+  `INTERNAL_API_URL`, `depends_on`, and `docker-compose.override.yml` still pointed at
+  the short names. All three confirmed live via `docker compose config`/`up`
+  before/after — current state (dotted keys, matching internal refs) boots clean,
+  migrates, and `web` calls `api` over `INTERNAL_API_URL: http://veblyss.api:4000`.
+  **If you touch service keys again, grep the whole repo for the old name** — this
+  bug has recurred every time a rename touched only the `services:` block and missed
+  one of `DATABASE_URL`/`REDIS_URL`/`INTERNAL_API_URL`/`depends_on`/
+  `docker-compose.override.yml`/README.md's literal `docker compose exec` commands.
 - **`next.config.ts`** image `remotePatterns` restricted to the real R2 media
   hostname — it was a wildcard (`hostname: "**"`), a known SSRF vector for Next's
   `/_next/image` endpoint.

@@ -90,7 +90,7 @@ Other `start.sh` commands:
 
 - **Python 3.12** — `pydantic-core`/`psycopg2-binary` don't yet build on 3.14
 - **Node.js ≥ 20** and **pnpm 9**
-- **PostgreSQL** running locally, or via `docker compose up postgres -d`
+- **PostgreSQL** running locally, or via `docker compose up veblyss.postgres -d`
 
 `start.sh` bootstraps `apps/api/.env` from `.env.example` on first run — fill in real secrets before deploying anywhere.
 
@@ -186,7 +186,7 @@ Two supported paths — pick one, don't run both against the same domain:
   the `web` service (see the comment in `Dockerfile.web` — it's baked into the browser
   bundle at build time, a runtime env var alone won't do it). `web`'s server-side fetches
   (SSR, admin pages) use `INTERNAL_API_URL` instead — hardcoded in `docker-compose.yaml`
-  to the compose network's `api` service name, so they never leave the Docker
+  to the compose network's `veblyss.api` service name, so they never leave the Docker
   network or depend on public DNS/the tunnel being up; only browser-side fetches need
   `NEXT_PUBLIC_API_URL` to resolve. The optional `cloudflared` service is off by default
   (`profiles: ["tunnel"]`) — only enable it if a Cloudflare Tunnel is deliberately
@@ -233,7 +233,7 @@ far)?
 
 ```bash
 docker compose ps                              # find the api container
-docker compose exec api flask --app wsgi.py db upgrade
+docker compose exec veblyss.api flask --app wsgi.py db upgrade
 ```
 
 No `docker compose` on the host? Plain docker works too:
@@ -245,7 +245,7 @@ docker exec -it <api-container-id> flask --app wsgi.py db upgrade
 Back up first — prod data, no undo:
 
 ```bash
-docker compose exec postgres pg_dump -U veblyss veblyss > backup_$(date +%F).sql
+docker compose exec veblyss.postgres pg_dump -U veblyss veblyss > backup_$(date +%F).sql
 ```
 </details>
 
@@ -255,14 +255,14 @@ docker compose exec postgres pg_dump -U veblyss veblyss > backup_$(date +%F).sql
 Use the `create-admin` CLI (`apps/api/app/auth/cli.py`) — idempotent, safe to re-run to reset a password or role:
 
 ```bash
-docker compose exec api flask --app wsgi.py create-admin \
+docker compose exec veblyss.api flask --app wsgi.py create-admin \
   --email person@veblyssglobal.com \
   --name "Person Name" \
   --password "strong-real-password" \
   --role admin        # or editor / viewer
 ```
 
-Running the API bare (no Docker)? Drop the `docker compose exec api` prefix and run the
+Running the API bare (no Docker)? Drop the `docker compose exec veblyss.api` prefix and run the
 `flask` command directly on the host.
 </details>
 
