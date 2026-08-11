@@ -18,6 +18,15 @@ exactly that, not "implemented but untested."
 - **`DEBUG = False`** explicit in `Config`, not left to Flask's implicit default.
 - **`.dockerignore`** added — without it, `Dockerfile.api`'s `COPY apps/api/ .` would
   have baked a local `apps/api/.env` (real secrets) straight into the image.
+- **`veblyss.api` no longer uses `env_file: apps/api/.env`** — that file is gitignored,
+  so it never existed on a host that deploys by cloning this repo (Coolify, Dokploy);
+  relying on it caused a hard `docker compose` failure in production. All of `api`'s
+  runtime secrets are now interpolated into `docker-compose.yaml` from the root `.env`
+  (`${SECRET_KEY}` etc.), the same convention `NEXT_PUBLIC_API_URL`/
+  `CLOUDFLARE_TUNNEL_TOKEN` already used — set them in your platform's env var UI.
+- **DB migrations run automatically on `api` boot** — `docker/entrypoint-api.sh` runs
+  `flask db upgrade` before gunicorn starts. Safe on every restart (Alembic no-ops if
+  already current); assumes a single `api` replica.
 - **`Dockerfile.api`** already ran as a non-root user and had an image-level
   healthcheck before this pass; `docker-compose.yaml` now also has matching
   `restart: unless-stopped` and a compose-level healthcheck on `api`, `postgres`,

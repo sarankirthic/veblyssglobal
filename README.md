@@ -163,6 +163,7 @@ veblyss/
 ├── docs/                Planning docs — architecture, sitemap, brand guide, content audit
 ├── Dockerfile.api          Container build for apps/api
 ├── Dockerfile.web           Container build for apps/web (self-hosted/Coolify — Vercel doesn't use this)
+├── docker/entrypoint-api.sh    Runs `flask db upgrade` before gunicorn starts (see Production operations)
 ├── docker-compose.yaml         Full-stack orchestration — the file Coolify deploys
 ├── docker-compose.override.yml Local-dev-only host port publishing (auto-merged)
 └── start.sh                      One-command dev/prod orchestration
@@ -178,8 +179,8 @@ Two supported paths — pick one, don't run both against the same domain:
 - **Vercel + container host** — `apps/web` deploys to Vercel (Next.js 15, App Router, zero
   extra config beyond `NEXT_PUBLIC_API_URL`); `apps/api` ships as a container via
   `Dockerfile.api` to wherever you host it.
-- **Fully self-hosted (e.g. Coolify)** — `docker-compose.yaml` deploys the whole stack
-  (`postgres`, `redis`, `api`, `web`) as one unit. No service publishes a fixed host
+- **Fully self-hosted (e.g. Coolify, Dokploy)** — `docker-compose.yaml` deploys the whole
+  stack (`postgres`, `redis`, `api`, `web`) as one unit. No service publishes a fixed host
   port — routing is meant to go through the platform's own reverse proxy (Coolify's
   Traefik, or your own nginx/Caddy). Set `NEXT_PUBLIC_API_URL` as a **build arg** for
   the `web` service (see the comment in `Dockerfile.web` — it's baked into the browser
@@ -190,6 +191,15 @@ Two supported paths — pick one, don't run both against the same domain:
   `NEXT_PUBLIC_API_URL` to resolve. The optional `cloudflared` service is off by default
   (`profiles: ["tunnel"]`) — only enable it if a Cloudflare Tunnel is deliberately
   replacing the platform's own ingress, not running alongside it.
+  - `veblyss.api`'s secrets (`SECRET_KEY`, `CORS_ORIGINS`, `R2_*`, session cookie
+    settings, etc.) are **not** read from `apps/api/.env` in this deployment path —
+    that file is gitignored and never exists on a host that deploys by cloning this
+    repo. They're interpolated from the root `.env` instead (`${SECRET_KEY}` etc. in
+    `docker-compose.yaml`), the same convention `NEXT_PUBLIC_API_URL` and
+    `CLOUDFLARE_TUNNEL_TOKEN` already use. Set them in your platform's own env var UI
+    (Coolify/Dokploy both write a `.env` next to `docker-compose.yaml`, which Compose
+    reads automatically) — see `apps/api/.env.example` for the full list and
+    `PRODUCTION_CHECKLIST.md` for which ones still need real values.
 
 ## Production operations
 
@@ -205,7 +215,17 @@ flask --app wsgi.py db upgrade   # test against local DB
 ```
 
 Commit the generated file under `apps/api/migrations/versions/` and deploy as usual.
-Then, on the prod host, apply it inside the running api container:
+
+**Applying it to prod is automatic** — `Dockerfile.api`'s entrypoint
+(`docker/entrypoint-api.sh`) runs `flask db upgrade` every time the `api` container
+boots, before gunicorn starts serving traffic. Alembic no-ops if the schema's already
+current, so this is safe on every restart/redeploy. This assumes a single `api`
+replica; if this stack ever scales to multiple replicas, cold-starting them
+simultaneously would race on `db upgrade` and needs a different rollout strategy
+(e.g. a one-off migration job before the replicas start).
+
+Need to run it by hand anyway (e.g. the container's crash-looping before it gets that
+far)?
 
 ```bash
 docker compose ps                              # find the api container

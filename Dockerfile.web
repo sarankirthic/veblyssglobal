@@ -1,15 +1,19 @@
+# syntax=docker/dockerfile:1.7
 # apps/web — Next.js storefront, standalone self-hosted build (Docker/Coolify).
 # Vercel deploys don't use this file at all — Vercel builds apps/web directly.
-FROM node:20-slim AS base
+FROM node:20-bookworm-slim AS base
 ENV PNPM_HOME="/pnpm"
 ENV PATH="$PNPM_HOME:$PATH"
-RUN corepack enable
+# Pin the exact pnpm version explicitly instead of trusting corepack's lazy
+# fetch-on-first-use — must match package.json's "packageManager" field.
+RUN corepack enable && corepack prepare pnpm@9.12.0 --activate
 
 FROM base AS deps
 WORKDIR /repo
 COPY package.json pnpm-lock.yaml pnpm-workspace.yaml turbo.json ./
 COPY apps/web/package.json apps/web/package.json
-RUN pnpm install --frozen-lockfile
+RUN --mount=type=cache,target=/pnpm/store,sharing=locked \
+    pnpm install --frozen-lockfile
 
 FROM base AS builder
 WORKDIR /repo
@@ -25,7 +29,8 @@ COPY --from=deps /repo/node_modules ./node_modules
 COPY package.json pnpm-lock.yaml pnpm-workspace.yaml turbo.json ./
 COPY apps/web ./apps/web
 COPY --from=deps /repo/apps/web/node_modules ./apps/web/node_modules
-RUN pnpm --filter @veblyss/web build
+RUN --mount=type=cache,target=/repo/apps/web/.next/cache,sharing=locked \
+    pnpm --filter @veblyss/web build
 
 FROM base AS runtime
 WORKDIR /app

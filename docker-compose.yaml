@@ -33,11 +33,30 @@ services:
       context: .
       dockerfile: Dockerfile.api
     restart: unless-stopped
-    env_file:
-      - apps/api/.env
+    # No env_file here on purpose — apps/api/.env is gitignored (real secrets,
+    # never committed) so it never exists on a host that deploys by cloning
+    # this repo (Coolify, Dokploy, ...). Every var below is interpolated from
+    # the root .env instead — same convention already used for
+    # NEXT_PUBLIC_API_URL/CLOUDFLARE_TUNNEL_TOKEN below. On Dokploy/Coolify,
+    # set these in the platform's own env var UI — both write a .env next to
+    # docker-compose.yaml, which Compose reads automatically for ${VAR}
+    # substitution.
     environment:
+      FLASK_ENV: ${FLASK_ENV:-production}
+      SECRET_KEY: ${SECRET_KEY?set in .env}
       DATABASE_URL: postgresql+psycopg2://veblyss:veblyss@postgres:5432/veblyss
+      SESSION_COOKIE_SECURE: ${SESSION_COOKIE_SECURE:-true}
+      SESSION_COOKIE_SAMESITE: ${SESSION_COOKIE_SAMESITE:-Lax}
+      SESSION_COOKIE_NAME: ${SESSION_COOKIE_NAME:-veblyss_session}
+      SESSION_LIFETIME_DAYS: ${SESSION_LIFETIME_DAYS:-7}
+      CORS_ORIGINS: ${CORS_ORIGINS?set in .env}
+      R2_ACCOUNT_ID: ${R2_ACCOUNT_ID:-}
+      R2_ACCESS_KEY_ID: ${R2_ACCESS_KEY_ID:-}
+      R2_SECRET_ACCESS_KEY: ${R2_SECRET_ACCESS_KEY:-}
+      R2_BUCKET_NAME: ${R2_BUCKET_NAME:-veblyss-media}
+      R2_PUBLIC_BASE_URL: ${R2_PUBLIC_BASE_URL:-}
       REDIS_URL: redis://redis:6379/0
+      LOG_LEVEL: ${LOG_LEVEL:-INFO}
     ports:
       - "4000"
     depends_on:
