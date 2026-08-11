@@ -4,18 +4,18 @@
 # reaching services from the host machine during local development, e.g. a
 # host-run `flask db upgrade` connecting to postgres at localhost:5432.
 services:
-  veblyss.postgres:
+  postgres:
     ports:
       - "5432:5432"
 
-  veblyss.redis:
+  redis:
     ports:
       - "6379:6379"
 
-  veblyss.api:
+  api:
     ports:
       - "4000:4000"
 
-  veblyss.web:
+  web:
     ports:
       - "3001:3001"

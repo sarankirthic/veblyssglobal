@@ -18,7 +18,7 @@ exactly that, not "implemented but untested."
 - **`DEBUG = False`** explicit in `Config`, not left to Flask's implicit default.
 - **`.dockerignore`** added — without it, `Dockerfile.api`'s `COPY apps/api/ .` would
   have baked a local `apps/api/.env` (real secrets) straight into the image.
-- **`veblyss.api` no longer uses `env_file: apps/api/.env`** — that file is gitignored,
+- **`api` no longer uses `env_file: apps/api/.env`** — that file is gitignored,
   so it never existed on a host that deploys by cloning this repo (Dokploy); relying on
   it caused a hard `docker compose` failure in production. All of `api`'s runtime
   secrets are now interpolated into `docker-compose.yaml` from the root `.env`
@@ -31,15 +31,18 @@ exactly that, not "implemented but untested."
   healthcheck before this pass; `docker-compose.yaml` now also has matching
   `restart: unless-stopped` and a compose-level healthcheck on `api`, `postgres`,
   `redis` (redis's was missing until this pass — added `redis-cli ping`).
-- **Fixed a boot-blocking hostname bug** — `api`'s `DATABASE_URL`/`REDIS_URL` pointed
-  at `postgres`/`redis`, but the actual service keys (and thus Compose's internal DNS
-  names) are `veblyss.postgres`/`veblyss.redis` — Compose does not create a short
-  alias from a dotted service name. This made `flask db upgrade` fail on every boot
-  (`could not translate host name "postgres" to address`), and since
-  `docker/entrypoint-api.sh` runs with `set -eu`, the container never reached
-  gunicorn — confirmed live via `docker compose up` before and after the fix. Any
-  service reference inside `docker-compose.yaml` must use the full dotted key
-  (`veblyss.postgres`, `veblyss.redis`, `veblyss.api`), not a shortened guess.
+- **Fixed a boot-blocking hostname bug (twice)** — service keys are the DNS names
+  Compose's internal network resolves; any internal reference (`DATABASE_URL`,
+  `REDIS_URL`, `INTERNAL_API_URL`, `depends_on`) that doesn't exactly match a real
+  service key silently creates a phantom undefined service and either fails
+  `docker compose config` outright or fails DNS resolution at runtime. Hit this once
+  when service keys were briefly `veblyss.postgres`/`veblyss.redis`/`veblyss.api` and
+  `DATABASE_URL`/`REDIS_URL` still said `postgres`/`redis`; hit it again the other
+  direction when keys were renamed back to short `postgres`/`redis`/`api`/`web` (with
+  `container_name: veblyss-*` for display) but a few refs still said `veblyss.postgres`
+  etc. Both confirmed live via `docker compose up` before/after — current state (short
+  keys, matching internal refs) boots clean, migrates, and `web` successfully calls
+  `api` over `INTERNAL_API_URL: http://api:4000`.
 - **`next.config.ts`** image `remotePatterns` restricted to the real R2 media
   hostname — it was a wildcard (`hostname: "**"`), a known SSRF vector for Next's
   `/_next/image` endpoint.
@@ -64,7 +67,7 @@ exactly that, not "implemented but untested."
   To actually deploy it on Dokploy: Dokploy has no UI field for `--profile`, so set
   `COMPOSE_PROFILES=tunnel` as an env var in Dokploy's UI (verified locally —
   `COMPOSE_PROFILES=tunnel docker compose config --services` includes
-  `veblyss.cloudflared`; without it, the service list stops at `veblyss.web`).
+  `cloudflared`; without it, the service list stops at `web`).
 
 ## You still need to do
 

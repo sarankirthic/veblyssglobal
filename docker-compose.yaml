@@ -9,7 +9,8 @@
 # reads this to know what to route to); postgres/redis don't need one at all
 # — nothing outside this stack should reach them directly.
 services:
-  veblyss.postgres:
+  postgres:
+    container_name: veblyss-postgres
     image: postgres:16-alpine
     restart: unless-stopped
     environment:
@@ -24,7 +25,8 @@ services:
       timeout: 5s
       retries: 10
 
-  veblyss.redis:
+  redis:
+    container_name: veblyss-redis
     image: redis:7-alpine
     restart: unless-stopped
     healthcheck:
@@ -33,7 +35,8 @@ services:
       timeout: 5s
       retries: 10
 
-  veblyss.api:
+  api:
+    container_name: veblyss-api
     build:
       context: .
       dockerfile: Dockerfile.api
@@ -49,7 +52,7 @@ services:
     environment:
       FLASK_ENV: ${FLASK_ENV:-production}
       SECRET_KEY: ${SECRET_KEY?set in .env}
-      DATABASE_URL: postgresql+psycopg2://veblyss:veblyss@veblyss.postgres:5432/veblyss
+      DATABASE_URL: postgresql+psycopg2://veblyss:veblyss@postgres:5432/veblyss
       SESSION_COOKIE_SECURE: ${SESSION_COOKIE_SECURE:-true}
       SESSION_COOKIE_SAMESITE: ${SESSION_COOKIE_SAMESITE:-Lax}
       SESSION_COOKIE_NAME: ${SESSION_COOKIE_NAME:-veblyss_session}
@@ -60,14 +63,14 @@ services:
       R2_SECRET_ACCESS_KEY: ${R2_SECRET_ACCESS_KEY:-}
       R2_BUCKET_NAME: ${R2_BUCKET_NAME:-veblyss-media}
       R2_PUBLIC_BASE_URL: ${R2_PUBLIC_BASE_URL:-}
-      REDIS_URL: redis://veblyss.redis:6379/0
+      REDIS_URL: redis://redis:6379/0
       LOG_LEVEL: ${LOG_LEVEL:-INFO}
     ports:
       - "4000"
     depends_on:
-      veblyss.postgres:
+      postgres:
         condition: service_healthy
-      veblyss.redis:
+      redis:
         condition: service_healthy
     healthcheck:
       test: ["CMD", "python", "-c", "import urllib.request,sys; sys.exit(0) if urllib.request.urlopen('http://127.0.0.1:4000/api/v1/health').status == 200 else sys.exit(1)"]
@@ -76,7 +79,8 @@ services:
       start_period: 10s
       retries: 3
 
-  veblyss.web:
+  web:
+    container_name: veblyss-web
     build:
       context: .
       dockerfile: Dockerfile.web
@@ -93,11 +97,11 @@ services:
       # Runtime-only, server-side fetches — reaches the api container directly
       # over the compose network instead of round-tripping through public
       # DNS/the Cloudflare Tunnel. Safe to hardcode: same network, every env.
-      INTERNAL_API_URL: http://veblyss.api:4000
+      INTERNAL_API_URL: http://api:4000
     ports:
       - "3001"
     depends_on:
-      - veblyss.api
+      - api
 
   # Optional: only starts with `docker compose --profile tunnel up`. Dokploy
   # already terminates TLS and routes domains through its own Traefik proxy —
@@ -105,9 +109,9 @@ services:
   # unless you're deliberately using the tunnel as ingress *instead* of
   # Dokploy's proxy. Decide which one is actually fronting traffic before
   # enabling this; running both is more likely to conflict than help.
-  veblyss.cloudflared:
+  cloudflared:
     profiles: ["tunnel"]
-    container_name: cloudflare-tunnel
+    container_name: veblyss-tunnel
     image: 'cloudflare/cloudflared:latest'
     restart: unless-stopped
     command: 'tunnel --no-autoupdate run'

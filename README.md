@@ -186,7 +186,7 @@ Two supported paths — pick one, don't run both against the same domain:
   the `web` service (see the comment in `Dockerfile.web` — it's baked into the browser
   bundle at build time, a runtime env var alone won't do it). `web`'s server-side fetches
   (SSR, admin pages) use `INTERNAL_API_URL` instead — hardcoded in `docker-compose.yaml`
-  to the compose network's `veblyss.api` service name, so they never leave the Docker
+  to the compose network's `api` service name, so they never leave the Docker
   network or depend on public DNS/the tunnel being up; only browser-side fetches need
   `NEXT_PUBLIC_API_URL` to resolve. The optional `cloudflared` service is off by default
   (`profiles: ["tunnel"]`) — only enable it if a Cloudflare Tunnel is deliberately
@@ -195,7 +195,7 @@ Two supported paths — pick one, don't run both against the same domain:
   it by setting `COMPOSE_PROFILES=tunnel` as an environment variable in Dokploy's env
   var UI instead — Compose reads that as a special variable from the same `.env` it
   already writes, and it activates the profile without a CLI flag.
-  - `veblyss.api`'s secrets (`SECRET_KEY`, `CORS_ORIGINS`, `R2_*`, session cookie
+  - `api`'s secrets (`SECRET_KEY`, `CORS_ORIGINS`, `R2_*`, session cookie
     settings, etc.) are **not** read from `apps/api/.env` in this deployment path —
     that file is gitignored and never exists on a host that deploys by cloning this
     repo. They're interpolated from the root `.env` instead (`${SECRET_KEY}` etc. in
