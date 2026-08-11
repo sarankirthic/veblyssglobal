@@ -30,7 +30,16 @@ exactly that, not "implemented but untested."
 - **`Dockerfile.api`** already ran as a non-root user and had an image-level
   healthcheck before this pass; `docker-compose.yaml` now also has matching
   `restart: unless-stopped` and a compose-level healthcheck on `api`, `postgres`,
-  `redis`.
+  `redis` (redis's was missing until this pass — added `redis-cli ping`).
+- **Fixed a boot-blocking hostname bug** — `api`'s `DATABASE_URL`/`REDIS_URL` pointed
+  at `postgres`/`redis`, but the actual service keys (and thus Compose's internal DNS
+  names) are `veblyss.postgres`/`veblyss.redis` — Compose does not create a short
+  alias from a dotted service name. This made `flask db upgrade` fail on every boot
+  (`could not translate host name "postgres" to address`), and since
+  `docker/entrypoint-api.sh` runs with `set -eu`, the container never reached
+  gunicorn — confirmed live via `docker compose up` before and after the fix. Any
+  service reference inside `docker-compose.yaml` must use the full dotted key
+  (`veblyss.postgres`, `veblyss.redis`, `veblyss.api`), not a shortened guess.
 - **`next.config.ts`** image `remotePatterns` restricted to the real R2 media
   hostname — it was a wildcard (`hostname: "**"`), a known SSRF vector for Next's
   `/_next/image` endpoint.
