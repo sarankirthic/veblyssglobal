@@ -132,7 +132,7 @@ docker compose up --build   # postgres + redis + api + web, all wired together
 ```
 
 `docker-compose.override.yml` (auto-merged, local-dev-only) publishes each service to its
-usual host port (`:5432`, `:6379`, `:4000`, `:3000`). `docker-compose.yaml` alone — no
+usual host port (`:5432`, `:6379`, `:4000`, `:3001`). `docker-compose.yaml` alone — no
 `docker-compose.override.yml` — is what Dokploy deploys; see
 [Deployment](#deployment) below.
 </details>
@@ -190,7 +190,11 @@ Two supported paths — pick one, don't run both against the same domain:
   network or depend on public DNS/the tunnel being up; only browser-side fetches need
   `NEXT_PUBLIC_API_URL` to resolve. The optional `cloudflared` service is off by default
   (`profiles: ["tunnel"]`) — only enable it if a Cloudflare Tunnel is deliberately
-  replacing the platform's own ingress, not running alongside it.
+  replacing the platform's own ingress, not running alongside it. Dokploy has no UI
+  field for compose `--profile` flags (it just runs `docker compose up -d`), so enable
+  it by setting `COMPOSE_PROFILES=tunnel` as an environment variable in Dokploy's env
+  var UI instead — Compose reads that as a special variable from the same `.env` it
+  already writes, and it activates the profile without a CLI flag.
   - `veblyss.api`'s secrets (`SECRET_KEY`, `CORS_ORIGINS`, `R2_*`, session cookie
     settings, etc.) are **not** read from `apps/api/.env` in this deployment path —
     that file is gitignored and never exists on a host that deploys by cloning this

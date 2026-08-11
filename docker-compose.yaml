@@ -95,7 +95,7 @@ services:
       # DNS/the Cloudflare Tunnel. Safe to hardcode: same network, every env.
       INTERNAL_API_URL: http://veblyss.api:4000
     ports:
-      - "3000"
+      - "3001"
     depends_on:
       - veblyss.api
 

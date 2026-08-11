@@ -61,6 +61,10 @@ exactly that, not "implemented but untested."
 - **`cloudflared` made opt-in** (`profiles: ["tunnel"]`) — it was in `docker-compose.yaml`
   from outside this session's work, unconditionally on; running it alongside Dokploy's
   own ingress is more likely to conflict than help, so it no longer starts by default.
+  To actually deploy it on Dokploy: Dokploy has no UI field for `--profile`, so set
+  `COMPOSE_PROFILES=tunnel` as an env var in Dokploy's UI (verified locally —
+  `COMPOSE_PROFILES=tunnel docker compose config --services` includes
+  `veblyss.cloudflared`; without it, the service list stops at `veblyss.web`).
 
 ## You still need to do
 
